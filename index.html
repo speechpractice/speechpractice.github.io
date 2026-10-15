@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Free daily voice and speaking practice for adults, including people living with Parkinson's, stroke, MS, brain injury or an aging voice. Not a medical device: loud “Ahh”, pitch slides, counting, everyday phrases and reading aloud, with a live loudness meter. 11 languages. No sign-up, and your data stays on your phone.">
-<title>Speech Practice · Free Daily Voice Practice in 11 Languages</title>
+<meta name="description" content="Free daily voice, speaking and gentle movement practice for adults, including people living with Parkinson's, stroke, MS, brain injury or an aging voice. Not a medical device: loud “Ahh”, pitch slides, counting, everyday phrases and reading aloud, with a live loudness meter. 11 languages. No sign-up, and your data stays on your phone.">
+<title>Speak &amp; Move · Free Daily Voice and Movement Practice</title>
 <meta name="theme-color" content="#1d6b64">
-<meta name="copyright" content="© 2026 Speech Practice. All rights reserved.">
+<meta name="copyright" content="© 2026 Speak &amp; Move. All rights reserved.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Speech Practice: free daily voice practice">
+<meta property="og:title" content="Speak &amp; Move: free daily voice and movement practice">
 <meta property="og:description" content="Free daily voice and speaking practice with a live loudness meter, in 11 languages. Made for adults, including people living with Parkinson's, stroke, MS or an aging voice. Not a medical device.">
 <meta property="og:url" content="https://speechpractice.github.io/">
 <meta property="og:image" content="https://speechpractice.github.io/icon-512.png">
@@ -25,7 +25,7 @@
   }
 </script>
 <!--SKELETON-END-->
-<title>Speech Practice</title>
+<title>Speak &amp; Move</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Sans+Tamil:wght@600;700&display=swap">
 <style>
@@ -140,6 +140,13 @@ textarea { min-height: 200px; resize: vertical; }
 select { font-size: .9rem; text-overflow: ellipsis; }
 .safety { border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: .85rem; color: var(--muted); display: flex; flex-direction: column; gap: 8px; }
 .safety b { color: var(--ink); }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--teal-soft); padding: 6px; border-radius: 16px; }
+.tab { min-height: 56px; background: transparent; color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 1.05rem; border-radius: 12px; }
+.tab.on { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.q { display: flex; flex-direction: column; gap: 8px; padding-block: 6px; border-top: 1px solid var(--line); }
+.yn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.yn .btn { min-height: 52px; }
+.yn .btn.picked { background: var(--teal); color: var(--surface); }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .full-terms summary { cursor: pointer; color: var(--teal); text-decoration: underline; min-height: 44px; display: flex; align-items: center; font-weight: 600; }
 .full-terms { display: flex; flex-direction: column; gap: 10px; }
@@ -177,12 +184,12 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         safetyShort: "This is not a prescription or medical advice. Check with your medical practitioner for medical advice. Not a medical device, and not reviewed or approved by any health regulator, such as the FDA (US), CDSCO (India), or regulators in the EU, UK, Canada or Australia. Ask your doctor or speech specialist before starting. Stop if you feel pain, strain, dizziness or shortness of breath. Use at your own risk.",
         emergency: "If speech suddenly becomes slurred or hard to understand, it can be a sign of a stroke. Call your local emergency number right away, for example 911 (US, Canada), 112 (EU, India), 108 (India), 999 (UK) or 000 (Australia).",
         aboutTitle: "About and safety", privacyTitle: "Privacy",
-        termsTitle: "Before you start", termsIntro: "Please read and agree to these terms to use Speech Practice. You only need to do this once on this device.",
-        termsPoints: ["This is a free practice tool for general voice and speaking practice. It is not a prescription, not medical advice and not a medical device.", "Check with your medical practitioner before starting, and follow their advice over this app.", "Stop if you feel pain, strain, dizziness, chest discomfort or shortness of breath.", "If speech suddenly becomes slurred or hard to understand, call your local emergency number right away. It can be a sign of a stroke.", "You use this app at your own risk. To the fullest extent permitted by law, its creator is not liable for any injury, loss or unintended consequence.", "Your name and practice history stay on this device."],
+        termsTitle: "Before you start", termsIntro: "Please read and agree to these terms to use Speak & Move. You only need to do this once on this device.",
+        termsPoints: ["This is a free practice tool for general voice, speaking and gentle physical activity. It is not a prescription, not medical advice and not a medical device.", "Physical exercise can cause falls or injury. Use a sturdy chair or counter for support and have someone nearby if you feel unsteady.", "Check with your medical practitioner before starting, and follow their advice over this app.", "Stop if you feel pain, strain, dizziness, chest discomfort or shortness of breath.", "If speech suddenly becomes slurred or hard to understand, call your local emergency number right away. It can be a sign of a stroke.", "You use this app at your own risk. To the fullest extent permitted by law, its creator is not liable for any injury, loss or unintended consequence.", "Your name and practice history stay on this device."],
         showFull: "Read the full terms and privacy notice", checkAge: "I am 18 or older, or I am a caregiver setting this up for an adult.", checkAgree: "I have read and agree to these terms. I understand this is not medical advice and I use this app at my own risk.",
-        agreeBtn: "I agree", declineBtn: "I do not agree", declined: "Speech Practice can only be used after you agree to these terms. If you are unsure, talk to your doctor or speech specialist first. You can come back anytime.", agreedOn: "You agreed to these terms on {date}.",
+        agreeBtn: "I agree", declineBtn: "I do not agree", declined: "Speak & Move can only be used after you agree to these terms. If you are unsure, talk to your doctor or speech specialist first. You can come back anytime.", agreedOn: "You agreed to these terms on {date}.",
         privacy: ["Your name, phrases, settings and practice history are saved only on this device. They are never sent to us or anyone else. Clearing your browser data deletes them.", "On the public website, an anonymous visitor counter (GoatCounter) counts page visits, which exercises are finished, and which practice language is chosen. It uses no cookies and does not record your name, phrases, practice style or anything you type. Your IP address is not stored.", "There are no accounts, ads or tracking across other websites. Questions: open an issue at github.com/speechpractice/speechpractice.github.io."], aboutLink: "Read about safety",
-        about: ["Intended purpose: Speech Practice is intended to help adults keep a regular habit of general voice and speaking practice for everyday wellbeing. It is not intended to diagnose, prevent, monitor, treat or alleviate any disease, injury or disability, and it does not replace or direct any professional care.", "This is not a prescription and not medical advice. Check with your medical practitioner for medical advice about your condition and treatment.", "It is not a medical device. It has not been reviewed, cleared or approved by any health regulator, such as the FDA (US), CDSCO (India), or regulators in the EU, UK, Canada or Australia.", "Practice styles adjust pacing and the number of rounds. They are not treatment plans for any condition.", "The loudness meter is a rough practice guide from your phone's microphone. It is not a calibrated measurement and should not be used for medical decisions.", "Talk to your doctor or speech specialist before starting, and follow their advice over this app. This matters most after a recent stroke, surgery or injury.", "Stop and rest if you feel pain, strain, dizziness, chest discomfort or shortness of breath.", "This app is for adults. It is not designed for children, ALS (motor neurone disease), stuttering, or trouble finding words (aphasia). Ask a speech specialist for exercises suited to those.", "Healthcare professionals who recommend this app should first check the rules of their local regulator and professional body, and follow their own clinical judgment.", "Use at your own risk. To the fullest extent permitted by law, the creator of this app is not liable for any injury, loss or unintended consequence arising from its use. Nothing here limits rights you have, or liability that cannot be limited, under the law of your country.", "The exercises are common voice-practice exercises. The app is independent and not affiliated with or endorsed by any commercial voice program."],
+        about: ["Intended purpose: Speak & Move is intended to help adults keep a regular habit of general voice, speaking and gentle physical activity practice for everyday wellbeing. It is not intended to diagnose, prevent, monitor, treat or alleviate any disease, injury or disability, and it does not replace or direct any professional care.", "This is not a prescription and not medical advice. Check with your medical practitioner for medical advice about your condition and treatment.", "It is not a medical device. It has not been reviewed, cleared or approved by any health regulator, such as the FDA (US), CDSCO (India), or regulators in the EU, UK, Canada or Australia.", "Practice styles adjust pacing, the number of rounds and which exercises are shown. They are not treatment plans for any condition.", "Physical exercise carries a risk of falls and injury. Use a sturdy chair or counter for support, clear the floor, and have someone nearby if you feel unsteady. Use the seated routine if you have fallen recently or feel unsteady. The exercise safety check is a simple guide, not a medical assessment.", "The loudness meter is a rough practice guide from your phone's microphone. It is not a calibrated measurement and should not be used for medical decisions.", "Talk to your doctor or speech specialist before starting, and follow their advice over this app. This matters most after a recent stroke, surgery or injury.", "Stop and rest if you feel pain, strain, dizziness, faintness, chest discomfort or unusual shortness of breath.", "This app is for adults. It is not designed for children, ALS (motor neurone disease), stuttering, or trouble finding words (aphasia). Ask a speech specialist for exercises suited to those.", "Healthcare professionals who recommend this app should first check the rules of their local regulator and professional body, and follow their own clinical judgment.", "Use at your own risk. To the fullest extent permitted by law, the creator of this app is not liable for any injury, loss or unintended consequence arising from its use. Nothing here limits rights you have, or liability that cannot be limited, under the law of your country.", "The exercises are common voice-practice and general fitness exercises. The app is independent and not affiliated with or endorsed by any commercial voice or exercise program."],
         home: "‹ Home", of: "{i} of {n}", times: "{n} times", toSay: "{n} to say", hear: "🔊 Read this to me", begin: "Begin",
         soft: "soft", target: "target", loud: "loud",
         allowMic: "Please allow the microphone so the loudness meter can work.", micOff: "Loudness meter is off (no microphone access). The exercises still work.",
@@ -511,16 +518,11 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
 
   function home() {
     stopTimer(); current = null;
+    if (S.tab === "move") return moveHome();
     const tdy = today();
     const doneCount = EX.filter((e) => tdy.done[e.id]).length;
     const next = EX.find((e) => !tdy.done[e.id]);
-    app.innerHTML = `
-      <div class="top">
-        <div><p class="eyebrow">${t("eyebrow")}</p><h1>${greeting()}${S.name ? ", " + esc(S.name) : ""}</h1></div>
-        <div class="top-actions">
-          <button class="icon-btn" id="settings" aria-label="${t("settings")}">⚙️</button>
-        </div>
-      </div>
+    app.innerHTML = `${header()}${tabs("speak")}
 
       <div class="card">
         <div><h2>${doneCount === EX.length ? t("allDoneToday") : t("today")}</h2>
@@ -552,14 +554,255 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         <p><b>${t("emergency")}</b></p>
         <button class="linkish" id="about">${t("aboutLink")}</button>
       </div>
-      <p class="note" dir="ltr">© 2026 Speech Practice · All rights reserved</p>`;
+      <p class="note" dir="ltr">© 2026 Speak &amp; Move · All rights reserved</p>`;
     app.querySelector("#settings").onclick = settings;
     app.querySelector("#about").onclick = () => { settings(); const a = document.getElementById("about-card"); if (a) a.scrollIntoView(); };
     app.querySelector("#share").onclick = share;
+    wireTabs();
     const go = app.querySelector("#go"); if (go) go.onclick = () => intro(next);
     const again = app.querySelector("#again"); if (again) again.onclick = () => intro(EX[0]);
     app.querySelectorAll("[data-ex]").forEach((b) => b.onclick = () => intro(EX.find((e) => e.id === b.dataset.ex)));
   }
+
+
+  // ---------- Move: gentle physical activity ----------
+  // Every exercise has a seated version, and a standing version done holding a sturdy chair or counter.
+  const MOVES = {
+    march:    { name: "Marching", short: "Warm up and get moving", type: "time", secs: 60,
+                stand: "Stand tall and hold the back of a sturdy chair. March in place, lifting your knees and swinging your free arm.",
+                seat: "Sit tall near the front of a sturdy chair. March your feet, lifting one knee at a time, and swing your arms.",
+                tip: "Count out loud as you march. It is voice practice too." },
+    shoulders:{ name: "Shoulder rolls", short: "Loosen up", type: "reps", reps: 10,
+                stand: "Stand tall, holding a chair if you like. Roll your shoulders up, back and down in slow circles.",
+                seat: "Sit tall. Roll your shoulders up, back and down in slow circles.",
+                tip: "Breathe slowly and keep it easy." },
+    reach:    { name: "Wide reaches", short: "Large, full movements", type: "reps", reps: 8,
+                stand: "Hold the chair with one hand. Reach the other arm up high, then out wide to the side. Do 8, then switch arms.",
+                seat: "Sit tall. Reach both arms up high, then open them wide to the sides, as far as feels comfortable.",
+                tip: "Make each movement as large as you comfortably can." },
+    sitstand: { name: "Sit to stand", short: "Leg strength", type: "reps", reps: 8,
+                stand: "Sit near the front of a sturdy chair with no wheels, feet flat. Lean forward, push through your legs and stand up tall. Sit down slowly. Use your hands if you need to.",
+                seat: "Sit tall with feet flat. Press your feet firmly into the floor as if you were about to stand. Hold for 3 seconds, then relax.",
+                tip: "Put the chair against a wall so it cannot slide." },
+    heels:    { name: "Heel raises", short: "Ankle and calf strength", type: "reps", reps: 10,
+                stand: "Hold the back of a sturdy chair or a counter with both hands. Rise up onto your toes, then lower slowly.",
+                seat: "Sit tall with feet flat. Lift both heels, lower them, then lift your toes. That is one.",
+                tip: "Keep holding on the whole time." },
+    knee:     { name: "Knee straightening", short: "Thigh strength", type: "reps", reps: 10,
+                stand: "Sit tall in a sturdy chair. Straighten one knee until your leg is out in front, hold for 2 seconds, and lower slowly. Do 10 with each leg.",
+                seat: "Sit tall in a sturdy chair. Straighten one knee until your leg is out in front, hold for 2 seconds, and lower slowly. Do 10 with each leg.",
+                tip: "Move slowly, both up and down." },
+    sidestep: { name: "Side steps", short: "Steady stepping", type: "reps", reps: 10,
+                stand: "Hold a kitchen counter with both hands. Take 5 side steps one way, then 5 back. Keep your feet apart and stand tall.",
+                seat: "Sit tall. Slide one foot out to the side and back, then the other foot.",
+                tip: "Take wide, deliberate steps." },
+    balance:  { name: "Supported balance", short: "Steadiness", type: "time", secs: 30,
+                stand: "Hold a counter with both hands. Stand with your feet together for 15 seconds. If that feels steady, place one foot in front of the other for 15 seconds. Keep holding on.",
+                seat: "Sit tall without leaning on the backrest. Slowly lean a little forward, back and to each side, returning to the middle each time.",
+                tip: "Always keep a hand on the counter, and have someone nearby." },
+    punches:  { name: "Punches", short: "Arms and heart rate", type: "time", secs: 60,
+                stand: "Hold the chair with one hand and punch forward with the other at a steady pace. Switch arms halfway.",
+                seat: "Sit tall. Make soft fists and punch forward, one arm then the other, at a steady pace.",
+                tip: "Breathe out with each punch." },
+    walk:     { name: "Steady walk", short: "Keep moving for a few minutes", type: "time", secs: 180,
+                stand: "Walk around your home at a steady pace, where you can talk but not sing. Use your walking aid if you have one. Or march in place holding the chair.",
+                seat: "Sit tall and march your feet quickly while swinging your arms, at a pace where you can talk but not sing.",
+                tip: "Clear the floor of rugs and clutter first." },
+    stretch:  { name: "Gentle stretches", short: "Cool down", type: "time", secs: 60,
+                stand: "Hold a wall. Step one foot back and press that heel down to stretch your calf, 20 seconds each leg. Then clasp your hands behind you and open your chest.",
+                seat: "Sit tall. Straighten one leg with the heel on the floor and lean forward gently, 20 seconds each leg. Then open your arms wide to stretch your chest.",
+                tip: "Stretch gently. Never bounce or push into pain." },
+    breathe:  { name: "Calm breathing", short: "Finish relaxed", type: "time", secs: 60,
+                stand: "Sit down comfortably. Breathe in slowly through your nose for 4 counts and out through your mouth for 6.",
+                seat: "Sit comfortably. Breathe in slowly through your nose for 4 counts and out through your mouth for 6.",
+                tip: "Let your shoulders drop." }
+  };
+  // Movement plan for each practice style.
+  const MOVE_PLANS = {
+    pd:      { steps: ["march", "reach", "sitstand", "heels", "sidestep", "balance", "punches", "walk", "stretch", "breathe"], tip: ["Move with large, steady movements.", "Count or sing out loud while you move. Many people find exercise easier when their medicine is working well."] },
+    stroke:  { steps: ["march", "reach", "sitstand", "knee", "heels", "sidestep", "balance", "stretch"], tip: ["Use both sides.", "Let your weaker side do its share. Move slowly and with control, and rest between exercises."] },
+    ms:      { steps: ["shoulders", "march", "knee", "punches", "stretch", "breathe"], tip: ["Short, cool and steady.", "Rest whenever you need. Keep cool, with water and a fan nearby, and stop before you feel tired."] },
+    tbi:     { steps: ["march", "sitstand", "heels", "balance", "walk", "stretch", "breathe"], tip: ["Steady pace.", "Stop if you get a headache, dizziness or blurred vision. Avoid fast head movements."] },
+    aging:   { steps: ["march", "sitstand", "heels", "knee", "sidestep", "balance", "walk", "stretch"], tip: ["Strength and balance.", "Doing strength and balance practice on 3 or more days a week helps you stay steady on your feet."] },
+    general: { steps: ["march", "reach", "sitstand", "heels", "sidestep", "balance", "punches", "walk", "stretch", "breathe"], tip: ["Keep moving.", "A little every day adds up. Go at your own pace."] }
+  };
+  const movePlan = () => MOVE_PLANS[S.condition] || MOVE_PLANS.pd;
+  const moveSecs = (m) => m.type === "time" ? m.secs : m.reps * 4;
+  const moveMinutes = () => Math.max(5, Math.round((movePlan().steps.reduce((a, id) => a + moveSecs(MOVES[id]) + 20, 0)) / 60));
+  const moved = () => { const tdy = today(); tdy.moved = tdy.moved || {}; return tdy.moved; };
+  function moveWeek() { let n = 0; const d = new Date(); for (let i = 0; i < 7; i++) { const h = S.history[dayKey(d)]; if (h && h.moved && Object.keys(h.moved).length) n++; d.setDate(d.getDate() - 1); } return n; }
+
+  // Safety check before the Move section opens. A "yes" to 1-3 locks it until a doctor says it is okay.
+  // A "yes" to 4 (falls or unsteadiness) switches to the seated routine.
+  const CHECK_QS = [
+    "Has a doctor told you to exercise only with medical supervision, or not to exercise at all?",
+    "Do you get chest pain, feel faint, or get very short of breath when you are active?",
+    "In the last 3 months, have you had a stroke, a heart problem, surgery, an injury or a new diagnosis that affects how you move?",
+    "Have you fallen in the last 6 months, or do you often feel unsteady on your feet?"
+  ];
+  const moveLocked = () => S.moveCheck && S.moveCheck.answers.slice(0, 3).some(Boolean) && !S.moveCheck.cleared;
+
+  function tabs(active) {
+    return `<div class="tabs" role="tablist">
+      <button role="tab" class="tab ${active === "speak" ? "on" : ""}" id="tab-speak" aria-selected="${active === "speak"}">🗣️ Speak</button>
+      <button role="tab" class="tab ${active === "move" ? "on" : ""}" id="tab-move" aria-selected="${active === "move"}">🏃 Move</button>
+    </div>`;
+  }
+  function wireTabs() {
+    app.querySelector("#tab-speak").onclick = () => { S.tab = "speak"; save(); home(); };
+    app.querySelector("#tab-move").onclick = () => { S.tab = "move"; save(); home(); };
+  }
+  function header() {
+    return `<div class="top">
+        <div><p class="eyebrow">Speak &amp; Move</p><h1>${greeting()}${S.name ? ", " + esc(S.name) : ""}</h1></div>
+        <div class="top-actions"><button class="icon-btn" id="settings" aria-label="${t("settings")}">⚙️</button></div>
+      </div>`;
+  }
+  const moveSafetyBox = () => `<div class="safety">
+      <p><b>Before you move:</b> use a sturdy chair with no wheels, clear the floor, and keep water nearby. Have someone nearby if you feel unsteady. Stop right away if you feel chest pain, dizziness, faintness, unusual shortness of breath or pain.</p>
+      <p><b>${t("emergency")}</b></p>
+      <button class="linkish" id="about">${t("aboutLink")}</button>
+    </div>`;
+
+  function moveHome() {
+    if (!S.moveCheck) return moveCheck();
+    const done = moved(), plan = movePlan();
+    const doneCount = plan.steps.filter((id) => done[id]).length;
+    const next = plan.steps.find((id) => !done[id]);
+    const locked = moveLocked();
+    app.innerHTML = `${header()}${tabs("move")}
+      ${locked ? `<div class="card">
+        <h2>Please check with your doctor first</h2>
+        <p>Based on your answers, talk to your doctor before using the exercises in this app.</p>
+        <label class="check-row" for="mv-ok"><input type="checkbox" id="mv-ok"> My doctor has said it is okay for me to do gentle home exercise.</label>
+        <button class="btn btn-primary" id="mv-unlock" disabled>Continue</button>
+        <button class="btn btn-ghost" id="mv-redo">Answer the questions again</button>
+      </div>` : `<div class="card">
+        <div><h2>${doneCount === plan.steps.length ? "All movement done today. Well done!" : "Today's movement"}</h2>
+        <p class="muted">${doneCount} of ${plan.steps.length} done · about ${moveMinutes()} minutes · ${S.seated ? "seated routine" : "standing with support"}</p></div>
+        ${next ? `<button class="btn btn-primary btn-big pulse" id="mv-go">${doneCount ? t("cont") : t("start")}: ${MOVES[next].name}</button>`
+               : `<button class="btn btn-ghost" id="mv-again">Do the routine again</button>`}
+        <ul class="ex-list">
+          ${plan.steps.map((id) => `<li><button class="ex-item ${done[id] ? "done" : ""}" data-mv="${id}">
+            <span class="chk" aria-hidden="true">${done[id] ? "✓" : ""}</span>
+            <span class="t"><b>${MOVES[id].name}</b><small>${MOVES[id].short}</small></span></button></li>`).join("")}
+        </ul>
+        <button class="btn btn-ghost" id="mv-mode">${S.seated ? "Seated routine is on" : "Switch to the seated routine"}</button>
+      </div>
+      <div class="card">
+        <h2>Progress</h2>
+        <div class="stats">
+          <div class="stat"><b>${moveWeek()}/7</b><span>days moved this week</span></div>
+          <div class="stat"><b>${Object.keys(done).length}</b><span>exercises today</span></div>
+          <div class="stat"><b>${moveMinutes()}</b><span>minutes in today's plan</span></div>
+        </div>
+      </div>
+      <div class="tip"><b>${esc(plan.tip[0])}</b> ${esc(plan.tip[1])}</div>`}
+      ${moveSafetyBox()}
+      <p class="note" dir="ltr">© 2026 Speak &amp; Move · All rights reserved</p>`;
+    app.querySelector("#settings").onclick = settings;
+    app.querySelector("#about").onclick = () => { settings(); const a = document.getElementById("about-card"); if (a) a.scrollIntoView(); };
+    wireTabs();
+    if (locked) {
+      const ok = app.querySelector("#mv-ok"), go = app.querySelector("#mv-unlock");
+      ok.onchange = () => { go.disabled = !ok.checked; };
+      go.onclick = () => { if (!ok.checked) return; S.moveCheck.cleared = new Date().toISOString(); save(); moveHome(); };
+      app.querySelector("#mv-redo").onclick = moveCheck;
+      return;
+    }
+    const g = app.querySelector("#mv-go"); if (g) g.onclick = () => moveRun(next, true);
+    const a = app.querySelector("#mv-again"); if (a) a.onclick = () => moveRun(plan.steps[0], true);
+    app.querySelector("#mv-mode").onclick = () => {
+      if (S.seated && S.moveCheck.answers[3]) { moveCheck(); return; }
+      S.seated = !S.seated; save(); moveHome();
+    };
+    app.querySelectorAll("[data-mv]").forEach((b) => b.onclick = () => moveRun(b.dataset.mv, false));
+  }
+
+  function moveCheck() {
+    const ans = [null, null, null, null];
+    app.innerHTML = `
+      <div class="top"><button class="icon-btn" id="back">${t("home")}</button></div>
+      <div class="card">
+        <p class="eyebrow">Move</p>
+        <h1>Safety check</h1>
+        <p>Please answer honestly. These questions help keep you safe. Your answers stay on this device.</p>
+        ${CHECK_QS.map((q, i) => `<div class="q"><p><b>${i + 1}.</b> ${esc(q)}</p>
+          <div class="yn"><button class="btn btn-ghost" data-q="${i}" data-a="1">Yes</button><button class="btn btn-ghost" data-q="${i}" data-a="0">No</button></div></div>`).join("")}
+        <button class="btn btn-primary btn-big" id="mc-done" disabled>Continue</button>
+      </div>`;
+    app.querySelector("#back").onclick = () => { S.tab = "speak"; save(); home(); };
+    const done = app.querySelector("#mc-done");
+    app.querySelectorAll("[data-q]").forEach((b) => b.onclick = () => {
+      const i = +b.dataset.q; ans[i] = b.dataset.a === "1";
+      app.querySelectorAll(`[data-q="${i}"]`).forEach((x) => x.classList.toggle("picked", x === b));
+      done.disabled = ans.some((x) => x === null);
+    });
+    done.onclick = () => {
+      if (ans.some((x) => x === null)) return;
+      S.moveCheck = { answers: ans, date: new Date().toISOString(), cleared: "" };
+      if (ans[3]) S.seated = true;
+      save(); track("move-check"); moveHome();
+    };
+  }
+
+  function moveRun(id, chain) {
+    stopTimer();
+    const m = MOVES[id], plan = movePlan();
+    const how = S.seated ? m.seat : m.stand;
+    const idx = plan.steps.indexOf(id);
+    app.innerHTML = `
+      <div class="top"><button class="icon-btn" id="back">${t("home")}</button><span class="eyebrow">${idx + 1} of ${plan.steps.length} · ${S.seated ? "Seated" : "Standing with support"}</span></div>
+      <div class="card">
+        <h1>${m.name}</h1>
+        <p style="font-size:1.15rem">${esc(how)}</p>
+        <div class="timer" id="mv-clock">${m.type === "time" ? fmtSecs(m.secs) : m.reps + "<small> times</small>"}</div>
+        ${m.type === "time" ? `<button class="btn btn-teal btn-big" id="mv-start">Start the timer</button>` : ""}
+        <button class="btn ${m.type === "time" ? "btn-ghost" : "btn-teal btn-big"}" id="mv-done">Done</button>
+        <button class="btn btn-ghost" id="mv-hear">${t("hear")}</button>
+        <p class="muted" style="text-align:center">${esc(m.tip)}</p>
+        <p class="note" style="text-align:center">Stop if anything hurts or you feel dizzy or short of breath.</p>
+      </div>
+      <button class="btn btn-ghost" id="mv-skip">Skip this one</button>`;
+    app.querySelector("#back").onclick = home;
+    app.querySelector("#mv-hear").onclick = () => speak(m.name + ". " + how + " " + m.tip);
+    const finish = (did) => {
+      stopTimer();
+      if (did) { moved()[id] = true; save(); }
+      const nextId = plan.steps.slice(idx + 1).find((x) => !moved()[x]);
+      if (chain && nextId) return moveRest(nextId);
+      if (plan.steps.every((x) => moved()[x])) track("move-all-done");
+      moveHome();
+    };
+    app.querySelector("#mv-done").onclick = () => finish(true);
+    app.querySelector("#mv-skip").onclick = () => finish(false);
+    const st = app.querySelector("#mv-start");
+    if (st) st.onclick = () => {
+      st.disabled = true; wake();
+      const clock = app.querySelector("#mv-clock"), end = performance.now() + m.secs * 1000;
+      timerId = setInterval(() => {
+        const left = Math.max(0, (end - performance.now()) / 1000);
+        clock.innerHTML = fmtSecs(Math.ceil(left));
+        if (left <= 0) { stopTimer(); clock.innerHTML = "✓"; st.textContent = "Time's up. Tap Done."; }
+      }, 200);
+    };
+  }
+  function moveRest(nextId) {
+    app.innerHTML = `
+      <div class="top"><button class="icon-btn" id="back">${t("home")}</button></div>
+      <div class="card" style="text-align:center">
+        <div class="celebrate" aria-hidden="true">👏</div>
+        <h2>Nice work. Rest and breathe.</h2>
+        <p class="muted">Sip some water. Take as long as you need.</p>
+        <p>Next: <b>${MOVES[nextId].name}</b></p>
+        <button class="btn btn-primary btn-big" id="mv-next">I'm ready</button>
+        <button class="btn btn-ghost" id="mv-stop">Stop for today</button>
+      </div>`;
+    app.querySelector("#back").onclick = home;
+    app.querySelector("#mv-next").onclick = () => moveRun(nextId, true);
+    app.querySelector("#mv-stop").onclick = home;
+  }
+  const fmtSecs = (n) => n >= 60 ? `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}` : `${n}<small>s</small>`;
 
   // Anonymous milestone counts for the visitor counter. Never includes names or phrases.
   function track(name) {
@@ -567,7 +810,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
   }
 
   // Terms must be accepted once per device. Changing TERMS_VERSION asks everyone to accept again.
-  const TERMS_VERSION = "2026-10-15";
+  const TERMS_VERSION = "2026-10-15-move";
   const hasAgreed = () => S.agreed === TERMS_VERSION;
   function start() {
     if (!hasAgreed()) return terms();
@@ -642,7 +885,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
   async function share() {
     track("share");
     const btn = app.querySelector("#share");
-    try { if (navigator.share) { await navigator.share({ title: "Speech Practice", url: SHARE_URL }); return; } } catch (e) { return; }
+    try { if (navigator.share) { await navigator.share({ title: "Speak & Move", url: SHARE_URL }); return; } } catch (e) { return; }
     try { await navigator.clipboard.writeText(SHARE_URL); btn.textContent = t("copied") + " ✓"; }
     catch (e) { btn.textContent = SHARE_URL; }
   }
@@ -825,6 +1068,8 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       <div class="top"><button class="icon-btn" id="back">${t("home")}</button><h1>${t("settings")}</h1></div>
       <div class="card">
         <label for="s-name">${t("nameLabel")}<input id="s-name" value="${esc(S.name)}"></label>
+        <label class="check-row" for="s-seated"><input type="checkbox" id="s-seated"> Seated exercise routine (Move)</label>
+        <button class="btn btn-ghost" id="s-recheck">Redo the exercise safety check</button>
         <label for="s-cond">${esc(condText().label)}
           <select id="s-cond">${condOptions()}</select></label>
         <label for="s-target">${t("targetLabel")}
@@ -872,6 +1117,8 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     sp.onchange = syncEnglish; syncEnglish();
     app.querySelector("#s-script").value = S.script;
     app.querySelector("#s-cond").value = S.condition;
+    app.querySelector("#s-seated").checked = !!S.seated;
+    app.querySelector("#s-recheck").onclick = () => { S.tab = "move"; moveCheck(); };
     app.querySelector("#s-phrases").value = S.phraseMode;
     app.querySelector("#back").onclick = home;
     app.querySelector("#save").onclick = () => {
@@ -881,6 +1128,8 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       S.practice = sp.value; S.withEnglish = se.checked;
       S.script = app.querySelector("#s-script").value;
       S.condition = app.querySelector("#s-cond").value; buildPlan();
+      const wantSeated = app.querySelector("#s-seated").checked;
+      S.seated = wantSeated || !!(S.moveCheck && S.moveCheck.answers[3]);
       S.phraseMode = app.querySelector("#s-phrases").value;
       S.mine = app.querySelector("#s-mine").value.split("\n").map((x) => x.trim()).filter(Boolean);
       save(); home();

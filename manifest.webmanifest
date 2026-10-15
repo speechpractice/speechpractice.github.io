@@ -1,7 +1,7 @@
 {
-  "name": "Speech Practice",
-  "short_name": "Speech Practice",
-  "description": "Free daily voice exercises for Parkinson's, stroke, MS, brain injury and aging voice.",
+  "name": "Speak & Move",
+  "short_name": "Speak & Move",
+  "description": "Free daily voice, speaking and gentle movement practice.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#eef4f3",

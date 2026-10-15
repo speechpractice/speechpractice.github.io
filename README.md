@@ -1,13 +1,33 @@
-# Speech Practice
+# Speak & Move
 
-Free daily voice exercises for Parkinson's, stroke, multiple sclerosis, brain injury and
-aging voice. Instructions in English, practice in 11 languages.
+Free daily voice, speaking and gentle movement practice for adults, including people living
+with Parkinson's, stroke, multiple sclerosis, brain injury or an aging voice. Instructions in
+English, voice practice in 11 languages.
 
 **Open the app:** https://speechpractice.github.io/
 
 It started as an app for my mom. It's free for anyone who can use it.
 
 ## What it does
+
+The app has two sections, switched with tabs at the top.
+
+### 🏃 Move
+
+- A short daily routine of gentle exercises: marching, wide reaches, sit to stand, heel raises,
+  knee straightening, side steps, supported balance, punches, a steady walk, stretches and
+  calm breathing. Each one has a **seated** version and a **standing** version done holding a
+  sturdy chair or counter.
+- **Safety check first.** Four yes/no questions. A "yes" about medical supervision, chest pain
+  or faintness, or a recent stroke, heart problem, surgery or injury locks the section until
+  the person confirms their doctor has said gentle home exercise is okay. A "yes" about falls
+  or unsteadiness switches to the seated routine.
+- The practice style shapes the routine (larger movements and rhythm, both sides, short and
+  cool sessions, steady pace, or strength and balance), drawing on published guidance such as
+  the Parkinson's Foundation/ACSM exercise recommendations and the WHO 2020 guidelines for
+  older adults.
+
+### 🗣️ Speak
 
 - Users can choose a practice style. Styles adjust pacing and the number of rounds; they are
   not treatment plans. The table shows each style and the people who often choose it:
@@ -54,13 +74,13 @@ adult, and agreement to the terms) and tap "I agree". The app does not open unti
 agreement is saved on the device, so it is asked once per device, and again only if the terms
 change (`TERMS_VERSION` in `index.html`) or browser data is cleared.
 
-**Intended purpose.** Speech Practice is intended to help adults keep a regular habit of
-general voice and speaking practice for everyday wellbeing. It is not intended to diagnose,
+**Intended purpose.** Speak & Move is intended to help adults keep a regular habit of
+general voice, speaking and gentle physical activity practice for everyday wellbeing. It is not intended to diagnose,
 prevent, monitor, treat or alleviate any disease, injury or disability, and it does not replace
 or direct any professional care.
 
 **Not a prescription or medical advice.** Check with your medical practitioner for medical
-advice. **Not a medical device.** Speech Practice is a free general-wellness practice tool. It does
+advice. **Not a medical device.** Speak & Move is a free general-wellness practice tool. It does
 not diagnose, treat, cure or prevent any disease, it gives no clinical measurements, and it
 has not been reviewed, cleared or approved by any health regulator, such as the FDA (US),
 CDSCO (India), or regulators in the EU, UK, Canada or Australia. The loudness meter is a rough practice guide, not a calibrated measurement.
@@ -87,7 +107,7 @@ country.
 
 ## License
 
-Copyright (c) 2026 Speech Practice. All rights reserved.
+Copyright (c) 2026 Speak & Move. All rights reserved.
 
 The app is free to use for personal practice at the link above. The code and content may
 not be copied, modified or republished without written permission. See [LICENSE](LICENSE).
