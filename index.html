@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Free daily voice and speaking practice for adults, including people living with Parkinson's, stroke, MS, brain injury or an aging voice. Not a medical device: loud “Ahh”, pitch slides, counting, everyday phrases and reading aloud, with a live loudness meter. 11 languages. No sign-up, and your data stays on your phone.">
+<title>Speech Practice · Free Daily Voice Practice in 11 Languages</title>
+<meta name="theme-color" content="#1d6b64">
+<meta name="copyright" content="© 2026 Speech Practice. All rights reserved.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Speech Practice: free daily voice practice">
+<meta property="og:description" content="Free daily voice and speaking practice with a live loudness meter, in 11 languages. Made for adults, including people living with Parkinson's, stroke, MS or an aging voice. Not a medical device.">
+<meta property="og:url" content="https://speechpractice.github.io/">
+<meta property="og:image" content="https://speechpractice.github.io/icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<!-- Anonymous visit counts (GoatCounter): no cookies, no personal data. Only runs on the public site. -->
+<script>
+  if (location.hostname.endsWith("github.io")) {
+    const gc = document.createElement("script");
+    gc.async = true; gc.src = "https://gc.zgo.at/count.js";
+    gc.dataset.goatcounter = "https://speakloud.goatcounter.com/count";
+    document.head.appendChild(gc);
+  }
+</script>
+<!--SKELETON-END-->
+<title>Speech Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Sans+Tamil:wght@600;700&display=swap">
+<style>
+/* Layout: one calm column, one big action per screen; large type and tap targets for shaky hands. */
+:root {
+  --bg: #eef4f3;
+  --surface: #ffffff;
+  --ink: #12302e;
+  --muted: #4d6764;
+  --line: #cfdedb;
+  --teal: #1d6b64;
+  --teal-soft: #d6ebe8;
+  --marigold: #f0a020;
+  --marigold-ink: #3a2400;
+  --good: #2e8540;
+  --warn: #b5560f;
+  --meter-bg: #dde8e6;
+  --display: "Lexend", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --radius: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1c1b; --surface: #15292a; --ink: #e7f2f0; --muted: #a3bcb8; --line: #2a4543;
+    --teal: #5fc2b6; --teal-soft: #1d3a38; --marigold: #f4b13d; --marigold-ink: #2a1a00;
+    --good: #6cc77d; --warn: #f0965a; --meter-bg: #22393a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1c1b; --surface: #15292a; --ink: #e7f2f0; --muted: #a3bcb8; --line: #2a4543;
+  --teal: #5fc2b6; --teal-soft: #1d3a38; --marigold: #f4b13d; --marigold-ink: #2a1a00;
+  --good: #6cc77d; --warn: #f0965a; --meter-bg: #22393a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { font-size: 20px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); line-height: 1.5; }
+.wrap { max-width: 640px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 48px; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.25; margin: 0; text-wrap: balance; }
+h1 { font-size: 1.7rem; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.05rem; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.eyebrow { font-family: var(--display); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+:lang(ta) { font-family: "Noto Sans Tamil", "Latha", "Tamil Sangam MN", var(--body); }
+
+button { font: inherit; cursor: pointer; border: 0; border-radius: var(--radius); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid var(--marigold); outline-offset: 3px; }
+.btn { min-height: 64px; padding: 14px 22px; font-family: var(--display); font-weight: 600; font-size: 1.05rem; display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; text-align: center; }
+.btn-primary { background: var(--marigold); color: var(--marigold-ink); }
+.btn-teal { background: var(--teal); color: var(--surface); }
+.btn-ghost { background: var(--teal-soft); color: var(--ink); }
+.btn-big { min-height: 96px; font-size: 1.4rem; }
+
+.card { background: var(--surface); border-radius: var(--radius); padding: 20px; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.top > div { min-width: 0; }
+.top-actions { display: flex; gap: 8px; flex: none; }
+.icon-btn { background: var(--teal-soft); color: var(--ink); min-width: 56px; min-height: 56px; padding: 0 14px; font-size: .85rem; font-family: var(--display); font-weight: 600; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.stat { background: var(--teal-soft); border-radius: 14px; padding: 12px; text-align: center; }
+.stat b { display: block; font-family: var(--display); font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.stat span { font-size: .72rem; color: var(--muted); }
+
+.ex-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ex-item { display: flex; align-items: center; gap: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; width: 100%; text-align: start; color: var(--ink); min-height: 64px; }
+.ex-item .chk { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--line); display: grid; place-items: center; font-weight: 700; color: var(--surface); }
+.ex-item.done .chk { background: var(--good); border-color: var(--good); }
+.ex-item .t { flex: 1; min-width: 0; }
+.ex-item .t b { font-family: var(--display); font-weight: 600; display: block; }
+.ex-item .t small { color: var(--muted); font-size: .78rem; }
+
+.lang-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.lang-btn { min-height: 64px; background: var(--surface); border: 2px solid var(--line); color: var(--ink); font-size: 1.1rem; font-weight: 600; padding: 10px; }
+.lang-btn.on { border-color: var(--marigold); background: var(--teal-soft); }
+
+/* exercise screen */
+.prompt { font-family: var(--display); font-weight: 700; font-size: 2.2rem; text-align: center; line-height: 1.3; padding: 18px 8px; overflow-wrap: anywhere; }
+.prompt.long { font-size: 1.5rem; }
+.prompt:lang(ta) { font-family: "Noto Sans Tamil", "Latha", "Tamil Sangam MN", sans-serif; font-size: 1.8rem; line-height: 1.5; padding-bottom: 4px; }
+.prompt.long:lang(ta) { font-size: 1.45rem; }
+.prompt-sub { text-align: center; display: flex; flex-direction: column; gap: 2px; }
+.prompt-sub b { font-family: var(--display); font-size: 1.15rem; }
+.prompt-sub span { color: var(--muted); font-size: .9rem; }
+.timer { font-family: var(--display); font-weight: 700; font-size: 4.5rem; text-align: center; font-variant-numeric: tabular-nums; line-height: 1; }
+.timer small { font-size: 1.2rem; color: var(--muted); }
+.reps { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.reps i { width: 18px; height: 18px; border-radius: 50%; background: var(--meter-bg); display: block; }
+.reps i.on { background: var(--teal); }
+.reps i.now { background: var(--marigold); }
+
+.meter { display: flex; flex-direction: column; gap: 6px; }
+.meter-track { position: relative; height: 40px; background: var(--meter-bg); border-radius: 12px; overflow: hidden; }
+.meter-fill { position: absolute; inset-block: 0; inset-inline-start: 0; width: 0%; background: var(--teal); transition: width .08s linear; }
+.meter-fill.loud { background: var(--good); }
+.meter-target { position: absolute; top: 0; bottom: 0; width: 4px; background: var(--marigold); }
+.meter-label { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); }
+.meter-say { text-align: center; font-family: var(--display); font-weight: 700; font-size: 1.3rem; min-height: 1.6em; }
+.meter-say.good { color: var(--good); }
+.meter-say.warn { color: var(--warn); }
+
+.chart { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--muted); font-family: var(--body); font-size: 17px; }
+.note { font-size: .8rem; color: var(--muted); }
+.tip { background: var(--teal-soft); border-radius: 14px; padding: 14px 16px; font-size: .95rem; }
+
+label { font-family: var(--display); font-weight: 600; font-size: .9rem; display: flex; flex-direction: column; gap: 6px; }
+input, textarea, select { font: inherit; font-size: 1rem; padding: 12px 14px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; }
+textarea { min-height: 200px; resize: vertical; }
+select { font-size: .9rem; text-overflow: ellipsis; }
+.safety { border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: .85rem; color: var(--muted); display: flex; flex-direction: column; gap: 8px; }
+.safety b { color: var(--ink); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.full-terms summary { cursor: pointer; color: var(--teal); text-decoration: underline; min-height: 44px; display: flex; align-items: center; font-weight: 600; }
+.full-terms { display: flex; flex-direction: column; gap: 10px; }
+.linkish { background: none; padding: 0; color: var(--teal); text-decoration: underline; font-size: .9rem; text-align: start; min-height: 44px; }
+.about { margin: 0; padding-inline-start: 1.2em; display: flex; flex-direction: column; gap: 8px; font-size: .9rem; }
+label.check-row { flex-direction: row; align-items: flex-start; gap: 12px; font-weight: 600; }
+input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: var(--teal); }
+
+.celebrate { text-align: center; font-size: 4rem; line-height: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .pulse { animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform: scale(1.03); } }
+}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+(() => {
+  const SHARE_URL = "https://speechpractice.github.io/";
+
+  // ---------- languages ----------
+  // Order: most speakers worldwide (first + second language), then Tamil.
+  // Items written "text|how it sounds|meaning" show a pronunciation line and a meaning line.
+  const LANGS = {
+    en: { name: "English", native: "English", tts: "en-US",
+      ui: {
+        eyebrow: "Speech practice", morning: "Good morning", afternoon: "Good afternoon", evening: "Good evening", settings: "Settings",
+        today: "Today's practice", allDoneToday: "All done today. Wonderful!", doneOf: "{d} of {n} exercises done · about {m} minutes",
+        start: "Start", cont: "Continue", again: "Practice the long “Ahh” again",
+        progress: "Progress", streak: "day streak", week: "days this week", longest: "longest “Ahh”",
+        chartTitle: "Longest “Ahh” each day", chartNote: "Last 14 days, in seconds. Taller is better.",
+        tipTitle: "Louder than it feels.", tip: "Many people feel they are speaking loudly when they are not. The meter helps you see it. If your throat hurts, stop and sip water.",
+        disclaimer: "This app supports, and does not replace, the plan from your speech specialist. Your practice data stays on this device.",
+        safetyShort: "This is not a prescription or medical advice. Check with your medical practitioner for medical advice. Not a medical device, and not reviewed or approved by any health regulator, such as the FDA (US), CDSCO (India), or regulators in the EU, UK, Canada or Australia. Ask your doctor or speech specialist before starting. Stop if you feel pain, strain, dizziness or shortness of breath. Use at your own risk.",
+        emergency: "If speech suddenly becomes slurred or hard to understand, it can be a sign of a stroke. Call your local emergency number right away, for example 911 (US, Canada), 112 (EU, India), 108 (India), 999 (UK) or 000 (Australia).",
+        aboutTitle: "About and safety", privacyTitle: "Privacy",
+        termsTitle: "Before you start", termsIntro: "Please read and agree to these terms to use Speech Practice. You only need to do this once on this device.",
+        termsPoints: ["This is a free practice tool for general voice and speaking practice. It is not a prescription, not medical advice and not a medical device.", "Check with your medical practitioner before starting, and follow their advice over this app.", "Stop if you feel pain, strain, dizziness, chest discomfort or shortness of breath.", "If speech suddenly becomes slurred or hard to understand, call your local emergency number right away. It can be a sign of a stroke.", "You use this app at your own risk. To the fullest extent permitted by law, its creator is not liable for any injury, loss or unintended consequence.", "Your name and practice history stay on this device."],
+        showFull: "Read the full terms and privacy notice", checkAge: "I am 18 or older, or I am a caregiver setting this up for an adult.", checkAgree: "I have read and agree to these terms. I understand this is not medical advice and I use this app at my own risk.",
+        agreeBtn: "I agree", declineBtn: "I do not agree", declined: "Speech Practice can only be used after you agree to these terms. If you are unsure, talk to your doctor or speech specialist first. You can come back anytime.", agreedOn: "You agreed to these terms on {date}.",
+        privacy: ["Your name, phrases, settings and practice history are saved only on this device. They are never sent to us or anyone else. Clearing your browser data deletes them.", "On the public website, an anonymous visitor counter (GoatCounter) counts page visits, which exercises are finished, and which practice language is chosen. It uses no cookies and does not record your name, phrases, practice style or anything you type. Your IP address is not stored.", "There are no accounts, ads or tracking across other websites. Questions: open an issue at github.com/speechpractice/speechpractice.github.io."], aboutLink: "Read about safety",
+        about: ["Intended purpose: Speech Practice is intended to help adults keep a regular habit of general voice and speaking practice for everyday wellbeing. It is not intended to diagnose, prevent, monitor, treat or alleviate any disease, injury or disability, and it does not replace or direct any professional care.", "This is not a prescription and not medical advice. Check with your medical practitioner for medical advice about your condition and treatment.", "It is not a medical device. It has not been reviewed, cleared or approved by any health regulator, such as the FDA (US), CDSCO (India), or regulators in the EU, UK, Canada or Australia.", "Practice styles adjust pacing and the number of rounds. They are not treatment plans for any condition.", "The loudness meter is a rough practice guide from your phone's microphone. It is not a calibrated measurement and should not be used for medical decisions.", "Talk to your doctor or speech specialist before starting, and follow their advice over this app. This matters most after a recent stroke, surgery or injury.", "Stop and rest if you feel pain, strain, dizziness, chest discomfort or shortness of breath.", "This app is for adults. It is not designed for children, ALS (motor neurone disease), stuttering, or trouble finding words (aphasia). Ask a speech specialist for exercises suited to those.", "Healthcare professionals who recommend this app should first check the rules of their local regulator and professional body, and follow their own clinical judgment.", "Use at your own risk. To the fullest extent permitted by law, the creator of this app is not liable for any injury, loss or unintended consequence arising from its use. Nothing here limits rights you have, or liability that cannot be limited, under the law of your country.", "The exercises are common voice-practice exercises. The app is independent and not affiliated with or endorsed by any commercial voice program."],
+        home: "‹ Home", of: "{i} of {n}", times: "{n} times", toSay: "{n} to say", hear: "🔊 Read this to me", begin: "Begin",
+        soft: "soft", target: "target", loud: "loud",
+        allowMic: "Please allow the microphone so the loudness meter can work.", micOff: "Loudness meter is off (no microphone access). The exercises still work.",
+        louder: "Louder!", great: "Great, that's loud!",
+        holdBtn: "Breathe in, then tap & say “Ahh”", stop: "Stop", tapAhh: "Tap & say “Ahh”", holdIt: "Hold it… loud!",
+        saidNext: "Said it! Next", saidFinish: "Said it! Finish",
+        record: "New record! 🎉", strong: "Strong voice!", good: "Good work!", nice: "Nice and loud!",
+        lastOne: "That was the last one.", rest: "Rest. Take a slow breath.", finish: "Finish", nextOne: "Next one",
+        exDone: "{ex} done", allDone: "All exercises done!", keepGoing: "Keep going, you are doing great.", wonderful: "Wonderful work today. See you tomorrow.",
+        next: "Next", backHome: "Back to home", longestToday: "Longest today: {s} seconds",
+        nameLabel: "Your name (optional)", targetLabel: "Loudness target", easier: "Easier (quiet room or weak microphone)", normal: "Normal", harder: "Harder (push for a bigger voice)",
+        secondLabel: "Also practice phrases in", none: "None", myPhrases: "My own phrases, one per line (optional)", save: "Save",
+        resetTitle: "Reset progress", resetDesc: "Deletes all practice history on this device.", resetBtn: "Reset history", resetConfirm: "Tap again to delete all history",
+        chooseLang: "Choose your language", share: "Share this free app", copied: "Link copied",
+        practiceLabel: "Which language do you want to practice?", practiceNote: "Instructions stay in English. Phrases and reading practice use this language.", withEnglish: "Also practice the English phrases", sayIn: "Say the numbers in {lang}.",
+        phraseModeLabel: "Everyday phrases", phraseMix: "4 favorites + 6 new ones each day (recommended)", phraseSame: "The same 10 every day", mixNote: "Today: 4 everyday favorites plus {n} that change daily.",
+        welcome: "Welcome!", askName: "What should we call you?", nameNote: "Your name and progress stay only on this phone. You can change them anytime in Settings.", skip: "Skip", scriptLabel: "Show practice words in", scriptBoth: "Original + English letters", scriptLatin: "English letters only", scriptNative: "Local script only"
+      },
+      ex: {
+        ahh: { name: "Long “Ahh”", short: "Hold a loud “Ahh” as long as you can", how: "Take a big breath. Say “Ahh” loud, like calling someone across the house. Hold it steady as long as you can.", tip: "Loud, not shouting. It should feel strong, never painful." },
+        high: { name: "High “Ahh”", short: "Slide your voice up high", how: "Start at your normal voice. Slide up as high as you can, then hold that high note loud for 5 seconds.", tip: "Think of a siren going up." },
+        low: { name: "Low “Ahh”", short: "Slide your voice down low", how: "Start at your normal voice. Slide down as low as you can, then hold that low note loud for 5 seconds.", tip: "Keep it loud even when it's low." },
+        count: { name: "Count out loud", short: "1 to 10, big and clear", how: "Say each number loud and clear. Take a breath whenever you need one.", tip: "Open your mouth wide on every number." },
+        ptk: { name: "Pa-Ta-Ka", short: "Lips and tongue workout", how: "Say each sound clearly and loud. Move your lips and tongue in a big way.", tip: "Clear first, then faster." },
+        phrases: { name: "Everyday phrases", short: "Things you say every day", how: "Read each sentence out loud, as if the person is in the next room.", tip: "Same loud voice as your “Ahh”." },
+        read: { name: "Read aloud", short: "Short sentences, loud voice", how: "Read each sentence out loud. Take a breath before you start each one.", tip: "Breathe in, then speak big." },
+        breath: { name: "One breath, one sentence", short: "Breathe, then say it all on one breath", how: "Take a calm breath into your belly. Say the whole sentence on that one breath, loud and clear. Stop, breathe again, then go on.", tip: "Breathe before you speak, not in the middle." }
+      },
+      phrases: ["Good morning!", "I would like a cup of tea, please.", "Hello! How are you today?", "Thank you very much!", "Please call my family.", "What is for lunch today?", "I am feeling good today.", "Where are my glasses?", "Let's go for a walk.", "Can you turn on the TV?", "Can you hear me?", "Please speak a little slower.", "I need some help, please.", "What time is it?", "I'm going to take a short rest.", "Can you open the window?", "The food is delicious.", "Please pass the salt.", "I would like some water.", "Let's call the family tonight.", "What is the weather like today?", "I took my medicine.", "See you tomorrow!", "Happy birthday!", "Where did I put my phone?", "Please turn up the volume.", "I'm a little tired today.", "Come and sit with me.", "That's a good idea!", "Good night, sleep well."],
+      reading: ["Every morning I drink my tea by the window.", "My grandchildren love to hear my stories.", "Fresh flowers are sold at the market.", "The bells ring loud in the evening.", "I speak loud and clear, so everyone can hear me."]
+    },
+
+    zh: { name: "Chinese (Mandarin)", native: "中文", tts: "zh-CN",
+      phrases: ["早上好！|Zǎoshang hǎo!|Good morning!", "请给我一杯茶。|Qǐng gěi wǒ yì bēi chá.|A cup of tea for me, please.", "你好！今天怎么样？|Nǐ hǎo! Jīntiān zěnmeyàng?|Hello! How are you today?", "非常感谢！|Fēicháng gǎnxiè!|Thank you very much!", "请给我家里人打电话。|Qǐng gěi wǒ jiālǐrén dǎ diànhuà.|Please call my family.", "今天午饭吃什么？|Jīntiān wǔfàn chī shénme?|What's for lunch today?", "我今天感觉很好。|Wǒ jīntiān gǎnjué hěn hǎo.|I feel good today.", "我的眼镜在哪里？|Wǒ de yǎnjìng zài nǎlǐ?|Where are my glasses?", "我们出去散散步吧。|Wǒmen chūqù sànsànbù ba.|Let's go out for a walk.", "请帮我打开电视。|Qǐng bāng wǒ dǎkāi diànshì.|Please turn on the TV for me.", "你能听见我吗？|Nǐ néng tīngjiàn wǒ ma?|Can you hear me?", "请说慢一点。|Qǐng shuō màn yìdiǎn.|Please speak a little slower.", "请帮帮我。|Qǐng bāngbang wǒ.|Please help me.", "现在几点了？|Xiànzài jǐ diǎn le?|What time is it?", "我去休息一会儿。|Wǒ qù xiūxi yíhuìr.|I'm going to rest for a while.", "请把窗户打开。|Qǐng bǎ chuānghu dǎkāi.|Please open the window.", "饭菜很好吃。|Fàncài hěn hǎochī.|The food is delicious.", "请把盐递给我。|Qǐng bǎ yán dì gěi wǒ.|Please pass me the salt.", "我想喝点水。|Wǒ xiǎng hē diǎn shuǐ.|I'd like some water.", "今晚给家里打个电话吧。|Jīnwǎn gěi jiālǐ dǎ ge diànhuà ba.|Let's call the family tonight.", "今天天气怎么样？|Jīntiān tiānqì zěnmeyàng?|What's the weather like today?", "我已经吃过药了。|Wǒ yǐjīng chīguo yào le.|I've taken my medicine.", "明天见！|Míngtiān jiàn!|See you tomorrow!", "生日快乐！|Shēngrì kuàilè!|Happy birthday!", "我的手机放哪儿了？|Wǒ de shǒujī fàng nǎr le?|Where did I put my phone?", "请把声音调大一点。|Qǐng bǎ shēngyīn tiáo dà yìdiǎn.|Please turn up the volume.", "我今天有点累。|Wǒ jīntiān yǒudiǎn lèi.|I'm a little tired today.", "过来和我坐一会儿。|Guòlái hé wǒ zuò yíhuìr.|Come and sit with me for a while.", "这是个好主意！|Zhè shì ge hǎo zhǔyi!|That's a good idea!", "晚安，睡个好觉。|Wǎn'ān, shuì ge hǎo jiào.|Good night, sleep well."],
+      reading: ["每天早上我在窗边喝茶。|Měitiān zǎoshang wǒ zài chuāng biān hē chá.|Every morning I drink tea by the window.", "孙子孙女们喜欢听我讲故事。|Sūnzi sūnnǚmen xǐhuan tīng wǒ jiǎng gùshi.|My grandchildren love to hear my stories.", "市场上有新鲜的花卖。|Shìchǎng shàng yǒu xīnxiān de huā mài.|Fresh flowers are sold at the market.", "傍晚的钟声又响亮又清楚。|Bàngwǎn de zhōngshēng yòu xiǎngliàng yòu qīngchu.|The evening bells are loud and clear.", "我说话大声又清楚，大家都能听见。|Wǒ shuōhuà dàshēng yòu qīngchu, dàjiā dōu néng tīngjiàn.|I speak loudly and clearly, so everyone can hear me."]
+    },
+
+    hi: { name: "Hindi", native: "हिन्दी", tts: "hi-IN",
+      ptk: ["पा · पा · पा · पा · पा", "टा · टा · टा · टा · टा", "का · का · का · का · का", "पा-टा-का · पा-टा-का · पा-टा-का"],
+      phrases: ["सुप्रभात!|Suprabhaat!|Good morning!", "मुझे एक कप चाय चाहिए।|Mujhe ek cup chai chahiye.|I would like a cup of tea.", "नमस्ते! आप कैसे हैं?|Namaste! Aap kaise hain?|Hello! How are you?", "बहुत-बहुत धन्यवाद!|Bahut-bahut dhanyavaad!|Thank you very much!", "मेरे घरवालों को फ़ोन करो।|Mere gharwalon ko phone karo.|Please call my family.", "आज खाने में क्या है?|Aaj khaane mein kya hai?|What is there to eat today?", "आज मेरी तबीयत अच्छी है।|Aaj meri tabiyat achchhi hai.|I feel well today.", "मेरा चश्मा कहाँ है?|Mera chashma kahaan hai?|Where are my glasses?", "चलो, थोड़ा टहलने चलते हैं।|Chalo, thoda tahalne chalte hain.|Come, let's go for a little walk.", "ज़रा टीवी चला दो।|Zara TV chala do.|Please turn on the TV.", "क्या आप मुझे सुन सकते हैं?|Kya aap mujhe sun sakte hain?|Can you hear me?", "कृपया थोड़ा धीरे बोलिए।|Kripya thoda dheere boliye.|Please speak a little slower.", "मुझे थोड़ी मदद चाहिए।|Mujhe thodi madad chahiye.|I need a little help.", "कितने बजे हैं?|Kitne baje hain?|What time is it?", "थोड़ी देर आराम करना है।|Thodi der aaram karna hai.|I need to rest for a while.", "ज़रा खिड़की खोल दो।|Zara khidki khol do.|Please open the window.", "खाना बहुत स्वादिष्ट है।|Khaana bahut swaadisht hai.|The food is delicious.", "ज़रा नमक देना।|Zara namak dena.|Please pass the salt.", "मुझे थोड़ा पानी चाहिए।|Mujhe thoda paani chahiye.|I'd like some water.", "आज रात घर पर फ़ोन करते हैं।|Aaj raat ghar par phone karte hain.|Let's call home tonight.", "आज मौसम कैसा है?|Aaj mausam kaisa hai?|What's the weather like today?", "मैंने दवा ले ली है।|Maine dawa le li hai.|I've taken my medicine.", "कल मिलते हैं!|Kal milte hain!|See you tomorrow!", "जन्मदिन मुबारक हो!|Janmadin mubaarak ho!|Happy birthday!", "मेरा फ़ोन कहाँ रखा है?|Mera phone kahaan rakha hai?|Where is my phone?", "ज़रा आवाज़ बढ़ा दो।|Zara aawaaz badha do.|Please turn up the volume.", "आज थोड़ी थकान है।|Aaj thodi thakaan hai.|I feel a little tired today.", "आओ, मेरे पास बैठो।|Aao, mere paas baitho.|Come, sit with me.", "यह अच्छा विचार है!|Yeh achchha vichaar hai!|That's a good idea!", "शुभ रात्रि, अच्छे से सोना।|Shubh raatri, achchhe se sona.|Good night, sleep well."],
+      reading: ["हर सुबह खिड़की के पास चाय पीना मुझे अच्छा लगता है।|Har subah khidki ke paas chai peena mujhe achchha lagta hai.|I love drinking tea by the window every morning.", "मेरे पोते-पोतियों को मेरी कहानियाँ सुनना बहुत पसंद है।|Mere pote-potiyon ko meri kahaaniyaan sunna bahut pasand hai.|My grandchildren love to hear my stories.", "बाज़ार में ताज़े फूल बिकते हैं।|Bazaar mein taaze phool bikte hain.|Fresh flowers are sold at the market.", "शाम को मंदिर की घंटियाँ ज़ोर से बजती हैं।|Shaam ko mandir ki ghantiyaan zor se bajti hain.|The temple bells ring loudly in the evening.", "मेरी आवाज़ ज़ोरदार और साफ़ है, सब सुन सकते हैं।|Meri aawaaz zordaar aur saaf hai, sab sun sakte hain.|My voice is strong and clear; everyone can hear it."]
+    },
+
+    es: { name: "Spanish", native: "Español", tts: "es-ES",
+      phrases: ["¡Buenos días!||Good morning!", "Quisiera una taza de té, por favor.||I'd like a cup of tea, please.", "¡Hola! ¿Cómo está hoy?||Hello! How are you today?", "¡Muchas gracias!||Thank you very much!", "Por favor, llame a mi familia.||Please call my family.", "¿Qué hay de comer hoy?||What's for lunch today?", "Hoy me siento bien.||I feel good today.", "¿Dónde están mis gafas?||Where are my glasses?", "Vamos a dar un paseo.||Let's go for a walk.", "¿Puede encender la televisión?||Can you turn on the TV?", "¿Me oye?||Can you hear me?", "Por favor, hable un poco más despacio.||Please speak a little slower.", "Necesito ayuda, por favor.||I need help, please.", "¿Qué hora es?||What time is it?", "Voy a descansar un rato.||I'm going to rest for a while.", "¿Puede abrir la ventana?||Can you open the window?", "La comida está deliciosa.||The food is delicious.", "Páseme la sal, por favor.||Please pass me the salt.", "Quisiera un poco de agua.||I'd like some water.", "Llamemos a la familia esta noche.||Let's call the family tonight.", "¿Qué tiempo hace hoy?||What's the weather like today?", "Ya tomé mi medicina.||I've taken my medicine.", "¡Hasta mañana!||See you tomorrow!", "¡Feliz cumpleaños!||Happy birthday!", "¿Dónde dejé mi teléfono?||Where did I leave my phone?", "Suba el volumen, por favor.||Please turn up the volume.", "Hoy tengo un poco de cansancio.||I'm a little tired today.", "Venga a sentarse conmigo.||Come and sit with me.", "¡Qué buena idea!||What a good idea!", "Buenas noches, que descanse.||Good night, rest well."],
+      reading: ["Cada mañana tomo café junto a la ventana.||Every morning I drink coffee by the window.", "A mis nietos les encanta escuchar mis historias.||My grandchildren love to hear my stories.", "En el mercado venden flores frescas.||Fresh flowers are sold at the market.", "Las campanas suenan fuerte por la tarde.||The bells ring loudly in the evening.", "Hablo fuerte y claro para que todos me oigan.||I speak loudly and clearly so everyone can hear me."]
+    },
+
+    ar: { name: "Arabic", native: "العربية", tts: "ar-SA", dir: "rtl",
+      ptk: ["با · با · با · با · با", "تا · تا · تا · تا · تا", "كا · كا · كا · كا · كا", "با تا كا · با تا كا · با تا كا"],
+      phrases: ["صباح الخير!|Sabah al-khayr!|Good morning!", "أريد كوبًا من الشاي، من فضلك.|Ureedu kooban mina ash-shay, min fadlak.|I'd like a cup of tea, please.", "مرحبًا! كيف حالك اليوم؟|Marhaban! Kayfa haluk al-yawm?|Hello! How are you today?", "شكرًا جزيلًا!|Shukran jazeelan!|Thank you very much!", "من فضلك اتصل بعائلتي.|Min fadlak ittasil bi-a'ilati.|Please call my family.", "ماذا سنأكل على الغداء اليوم؟|Matha sana'kul 'ala al-ghada' al-yawm?|What will we have for lunch today?", "أشعر أنني بخير اليوم.|Ash'uru annani bi-khayr al-yawm.|I feel fine today.", "أين نظارتي؟|Ayna nazzarati?|Where are my glasses?", "هيا نتمشّى قليلًا.|Hayya natamashsha qaleelan.|Let's take a little walk.", "هل يمكنك تشغيل التلفاز؟|Hal yumkinuk tashgheel at-tilfaz?|Can you turn on the TV?", "هل تسمعني؟|Hal tasma'uni?|Can you hear me?", "تكلّم ببطء قليلًا من فضلك.|Takallam bi-but'in qaleelan min fadlak.|Please speak a little slower.", "أحتاج إلى مساعدة، من فضلك.|Ahtaju ila musa'ada, min fadlak.|I need help, please.", "كم الساعة الآن؟|Kam as-sa'a al-aan?|What time is it now?", "سأرتاح قليلًا.|Sa-artahu qaleelan.|I'll rest for a little while.", "افتح النافذة من فضلك.|Iftah an-nafitha min fadlak.|Please open the window.", "الطعام لذيذ جدًا.|At-ta'am latheeth jiddan.|The food is very delicious.", "ناولني الملح من فضلك.|Nawilni al-milh min fadlak.|Please pass me the salt.", "أريد قليلًا من الماء.|Ureedu qaleelan mina al-maa'.|I'd like some water.", "لنتصل بالعائلة الليلة.|Li-nattasil bil-'a'ila al-layla.|Let's call the family tonight.", "كيف الطقس اليوم؟|Kayfa at-taqs al-yawm?|How's the weather today?", "أخذت دوائي.|Akhathtu dawa'i.|I've taken my medicine.", "أراك غدًا!|Araka ghadan!|See you tomorrow!", "عيد ميلاد سعيد!|'Eed milad sa'eed!|Happy birthday!", "أين وضعت هاتفي؟|Ayna wada'tu hatifi?|Where did I put my phone?", "ارفع الصوت من فضلك.|Irfa' as-sawt min fadlak.|Please turn up the volume.", "أشعر ببعض التعب اليوم.|Ash'uru bi-ba'd at-ta'ab al-yawm.|I feel a little tired today.", "تعال واجلس معي.|Ta'ala wajlis ma'i.|Come and sit with me.", "هذه فكرة جيدة!|Hathihi fikra jayyida!|That's a good idea!", "تصبح على خير.|Tusbih 'ala khayr.|Good night."],
+      reading: ["كل صباح أشرب الشاي بجانب النافذة.|Kulla sabah ashrabu ash-shay bi-janib an-nafitha.|Every morning I drink tea by the window.", "أحفادي يحبون أن يسمعوا قصصي.|Ahfadi yuhibboona an yasma'oo qisasi.|My grandchildren love to hear my stories.", "تُباع الزهور الطازجة في السوق.|Tuba'u az-zuhoor at-tazija fi as-souq.|Fresh flowers are sold at the market.", "السماء زرقاء وجميلة اليوم.|As-sama'u zarqa'u wa jameela al-yawm.|The sky is blue and beautiful today.", "أتكلم بصوت عالٍ وواضح ليسمعني الجميع.|Atakallamu bi-sawtin 'aalin wa wadih li-yasma'ani al-jamee'.|I speak loudly and clearly so everyone hears me."]
+    },
+
+    fr: { name: "French", native: "Français", tts: "fr-FR",
+      phrases: ["Bonjour !||Hello!", "Je voudrais une tasse de thé, s'il vous plaît.||I'd like a cup of tea, please.", "Bonjour ! Comment allez-vous aujourd'hui ?||Hello! How are you today?", "Merci beaucoup !||Thank you very much!", "Appelez ma famille, s'il vous plaît.||Please call my family.", "Qu'est-ce qu'on mange ce midi ?||What are we having for lunch?", "Je me sens bien aujourd'hui.||I feel good today.", "Où sont mes lunettes ?||Where are my glasses?", "Allons faire une promenade.||Let's go for a walk.", "Pouvez-vous allumer la télé ?||Can you turn on the TV?", "Vous m'entendez ?||Can you hear me?", "Parlez un peu plus lentement, s'il vous plaît.||Please speak a little slower.", "J'ai besoin d'aide, s'il vous plaît.||I need help, please.", "Quelle heure est-il ?||What time is it?", "Je vais me reposer un peu.||I'm going to rest a little.", "Pouvez-vous ouvrir la fenêtre ?||Can you open the window?", "Le repas est délicieux.||The meal is delicious.", "Passez-moi le sel, s'il vous plaît.||Please pass me the salt.", "Je voudrais un peu d'eau.||I'd like some water.", "Appelons la famille ce soir.||Let's call the family tonight.", "Quel temps fait-il aujourd'hui ?||What's the weather like today?", "J'ai pris mon médicament.||I've taken my medicine.", "À demain !||See you tomorrow!", "Joyeux anniversaire !||Happy birthday!", "Où ai-je mis mon téléphone ?||Where did I put my phone?", "Montez le son, s'il vous plaît.||Please turn up the volume.", "J'ai un peu de fatigue aujourd'hui.||I feel a little tired today.", "Venez vous asseoir avec moi.||Come and sit with me.", "C'est une bonne idée !||That's a good idea!", "Bonne nuit, dormez bien.||Good night, sleep well."],
+      reading: ["Chaque matin, je bois mon café près de la fenêtre.||Every morning I drink my coffee by the window.", "Mes petits-enfants adorent écouter mes histoires.||My grandchildren love to hear my stories.", "On vend des fleurs fraîches au marché.||Fresh flowers are sold at the market.", "Les cloches sonnent fort le soir.||The bells ring loudly in the evening.", "Je parle fort et clairement pour que tout le monde m'entende.||I speak loudly and clearly so everyone can hear me."]
+    },
+
+    bn: { name: "Bengali", native: "বাংলা", tts: "bn-IN",
+      ptk: ["পা · পা · পা · পা · পা", "টা · টা · টা · টা · টা", "কা · কা · কা · কা · কা", "পা-টা-কা · পা-টা-কা · পা-টা-কা"],
+      phrases: ["সুপ্রভাত!|Suprobhat!|Good morning!", "আমাকে এক কাপ চা দাও।|Amake ek kap cha dao.|Give me a cup of tea.", "নমস্কার! কেমন আছেন?|Nomoshkar! Kemon achhen?|Hello! How are you?", "অনেক ধন্যবাদ!|Onek dhonnobad!|Thank you very much!", "আমার পরিবারকে ফোন করো।|Amar poribarke phone koro.|Please call my family.", "আজ দুপুরে কী রান্না হয়েছে?|Aaj dupure ki ranna hoyechhe?|What's cooked for lunch today?", "আজ আমার শরীর ভালো আছে।|Aaj amar shorir bhalo achhe.|I feel well today.", "আমার চশমা কোথায়?|Amar choshma kothay?|Where are my glasses?", "চলো, একটু হাঁটতে যাই।|Cholo, ektu hantte jai.|Come, let's go for a little walk.", "টিভিটা চালিয়ে দাও।|TV-ta chaliye dao.|Please turn on the TV.", "আপনি কি আমার কথা শুনতে পাচ্ছেন?|Apni ki amar kotha shunte pachchhen?|Can you hear me?", "একটু আস্তে বলুন।|Ektu aste bolun.|Please speak a little slower.", "আমার একটু সাহায্য দরকার।|Amar ektu shahajjo dorkar.|I need a little help.", "কটা বাজে?|Kota baje?|What time is it?", "আমি একটু বিশ্রাম নেব।|Ami ektu bishram nebo.|I'll rest for a while.", "জানালাটা খুলে দাও।|Janalata khule dao.|Please open the window.", "খাবারটা খুব সুস্বাদু।|Khabarta khub sushadu.|The food is delicious.", "নুনটা একটু দাও।|Nunta ektu dao.|Please pass the salt.", "আমাকে একটু জল দাও।|Amake ektu jol dao.|Please give me some water.", "আজ রাতে বাড়িতে ফোন করি।|Aaj raate barite phone kori.|Let's call home tonight.", "আজ আবহাওয়া কেমন?|Aaj abhaowa kemon?|What's the weather like today?", "আমি ওষুধ খেয়ে নিয়েছি।|Ami oshudh kheye niyechhi.|I've taken my medicine.", "কাল দেখা হবে!|Kaal dekha hobe!|See you tomorrow!", "শুভ জন্মদিন!|Shubho jonmodin!|Happy birthday!", "আমার ফোনটা কোথায় রাখলাম?|Amar phonta kothay rakhlam?|Where did I put my phone?", "আওয়াজটা একটু বাড়িয়ে দাও।|Awajta ektu bariye dao.|Please turn up the volume.", "আজ একটু ক্লান্ত লাগছে।|Aaj ektu klanto lagchhe.|I feel a little tired today.", "এসো, আমার পাশে বসো।|Esho, amar pashe bosho.|Come, sit beside me.", "এটা ভালো বুদ্ধি!|Eta bhalo buddhi!|That's a good idea!", "শুভ রাত্রি, ভালো করে ঘুমিও।|Shubho ratri, bhalo kore ghumio.|Good night, sleep well."],
+      reading: ["প্রতিদিন সকালে আমি জানালার পাশে চা খাই।|Protidin shokale ami janalar pashe cha khai.|Every morning I drink tea by the window.", "আমার নাতি-নাতনিরা আমার গল্প শুনতে খুব ভালোবাসে।|Amar nati-natnira amar golpo shunte khub bhalobashe.|My grandchildren love to hear my stories.", "বাজারে তাজা ফুল বিক্রি হয়।|Bajare taja phul bikri hoy.|Fresh flowers are sold at the market.", "সন্ধ্যায় মন্দিরের ঘণ্টা জোরে বাজে।|Shondhyay mondirer ghonta jore baje.|The temple bells ring loudly in the evening.", "আমি জোরে আর স্পষ্ট করে কথা বলি, সবাই শুনতে পায়।|Ami jore ar sposhto kore kotha boli, shobai shunte pay.|I speak loudly and clearly; everyone can hear."]
+    },
+
+    pt: { name: "Portuguese", native: "Português", tts: "pt-BR",
+      phrases: ["Bom dia!||Good morning!", "Eu queria uma xícara de café, por favor.||I'd like a cup of coffee, please.", "Olá! Como você está hoje?||Hello! How are you today?", "Agradeço muito!||Thank you very much!", "Por favor, ligue para a minha família.||Please call my family.", "O que tem para o almoço hoje?||What's for lunch today?", "Hoje estou me sentindo bem.||I'm feeling good today.", "Onde estão os meus óculos?||Where are my glasses?", "Vamos dar uma caminhada.||Let's go for a walk.", "Pode ligar a televisão?||Can you turn on the TV?", "Você está me ouvindo?||Can you hear me?", "Por favor, fale um pouco mais devagar.||Please speak a little slower.", "Preciso de ajuda, por favor.||I need help, please.", "Que horas são?||What time is it?", "Vou descansar um pouco.||I'm going to rest a little.", "Pode abrir a janela?||Can you open the window?", "A comida está deliciosa.||The food is delicious.", "Me passa o sal, por favor.||Please pass me the salt.", "Eu queria um pouco de água.||I'd like some water.", "Vamos ligar para a família hoje à noite.||Let's call the family tonight.", "Como está o tempo hoje?||What's the weather like today?", "Já tomei o meu remédio.||I've taken my medicine.", "Até amanhã!||See you tomorrow!", "Feliz aniversário!||Happy birthday!", "Onde eu deixei o meu celular?||Where did I leave my phone?", "Aumenta o volume, por favor.||Please turn up the volume.", "Hoje estou com um pouco de cansaço.||I'm a little tired today.", "Venha sentar comigo.||Come and sit with me.", "Que boa ideia!||What a good idea!", "Boa noite, durma bem.||Good night, sleep well."],
+      reading: ["Toda manhã eu tomo café perto da janela.||Every morning I drink coffee by the window.", "Meus netos adoram ouvir as minhas histórias.||My grandchildren love to hear my stories.", "Vendem flores frescas na feira.||Fresh flowers are sold at the market.", "Os sinos tocam alto no fim da tarde.||The bells ring loudly in the late afternoon.", "Eu falo alto e claro para todos me ouvirem.||I speak loudly and clearly so everyone can hear me."]
+    },
+
+    ru: { name: "Russian", native: "Русский", tts: "ru-RU",
+      ptk: ["па · па · па · па · па", "та · та · та · та · та", "ка · ка · ка · ка · ка", "па-та-ка · па-та-ка · па-та-ка"],
+      phrases: ["Доброе утро!|Dobroye utro!|Good morning!", "Можно мне чашку чая, пожалуйста?|Mozhno mne chashku chaya, pozhaluysta?|May I have a cup of tea, please?", "Здравствуйте! Как у вас дела?|Zdravstvuyte! Kak u vas dela?|Hello! How are you?", "Большое спасибо!|Bolshoye spasibo!|Thank you very much!", "Позвоните, пожалуйста, моей семье.|Pozvonite, pozhaluysta, moyey semye.|Please call my family.", "Что у нас сегодня на обед?|Chto u nas segodnya na obed?|What's for lunch today?", "Сегодня я хорошо себя чувствую.|Segodnya ya khorosho sebya chuvstvuyu.|I feel good today.", "Где мои очки?|Gde moi ochki?|Where are my glasses?", "Пойдёмте прогуляемся.|Poydyomte progulyayemsya.|Let's go for a walk.", "Включите, пожалуйста, телевизор.|Vklyuchite, pozhaluysta, televizor.|Please turn on the TV.", "Вы меня слышите?|Vy menya slyshite?|Can you hear me?", "Говорите, пожалуйста, помедленнее.|Govorite, pozhaluysta, pomedlenneye.|Please speak more slowly.", "Мне нужна помощь, пожалуйста.|Mne nuzhna pomoshch, pozhaluysta.|I need help, please.", "Который час?|Kotoryy chas?|What time is it?", "Я немного отдохну.|Ya nemnogo otdokhnu.|I'll rest a little.", "Откройте, пожалуйста, окно.|Otkroyte, pozhaluysta, okno.|Please open the window.", "Еда очень вкусная.|Yeda ochen vkusnaya.|The food is very tasty.", "Передайте, пожалуйста, соль.|Peredayte, pozhaluysta, sol.|Please pass the salt.", "Можно мне немного воды?|Mozhno mne nemnogo vody?|May I have some water?", "Давайте вечером позвоним семье.|Davayte vecherom pozvonim semye.|Let's call the family this evening.", "Какая сегодня погода?|Kakaya segodnya pogoda?|What's the weather today?", "Лекарство уже принято.|Lekarstvo uzhe prinyato.|My medicine is already taken.", "До завтра!|Do zavtra!|See you tomorrow!", "С днём рождения!|S dnyom rozhdeniya!|Happy birthday!", "Где мой телефон?|Gde moy telefon?|Where is my phone?", "Сделайте, пожалуйста, погромче.|Sdelayte, pozhaluysta, pogromche.|Please turn it up louder.", "Сегодня чувствую усталость.|Segodnya chuvstvuyu ustalost.|I feel tired today.", "Садитесь рядом со мной.|Sadites ryadom so mnoy.|Sit next to me.", "Отличная идея!|Otlichnaya ideya!|Great idea!", "Спокойной ночи!|Spokoynoy nochi!|Good night!"],
+      reading: ["Каждое утро я пью чай у окна.|Kazhdoye utro ya pyu chay u okna.|Every morning I drink tea by the window.", "Мои внуки любят слушать мои истории.|Moi vnuki lyubyat slushat moi istorii.|My grandchildren love to hear my stories.", "На рынке продают свежие цветы.|Na rynke prodayut svezhiye tsvety.|Fresh flowers are sold at the market.", "Вечером громко звонят колокола.|Vecherom gromko zvonyat kolokola.|In the evening the bells ring loudly.", "Я говорю громко и чётко, чтобы все меня слышали.|Ya govoryu gromko i chyotko, chtoby vse menya slyshali.|I speak loudly and clearly so everyone can hear me."]
+    },
+
+    id: { name: "Indonesian", native: "Bahasa Indonesia", tts: "id-ID",
+      phrases: ["Selamat pagi!||Good morning!", "Saya mau secangkir teh, ya.||I'd like a cup of tea, please.", "Halo! Apa kabar hari ini?||Hello! How are you today?", "Terima kasih banyak!||Thank you very much!", "Tolong telepon anak saya.||Please call my child.", "Makan siang hari ini apa?||What's for lunch today?", "Hari ini saya merasa sehat.||I feel healthy today.", "Kacamata saya di mana?||Where are my glasses?", "Ayo jalan-jalan sebentar.||Let's go for a short walk.", "Tolong nyalakan TV.||Please turn on the TV.", "Apakah Anda bisa mendengar saya?||Can you hear me?", "Tolong bicara sedikit lebih pelan.||Please speak a little slower.", "Saya butuh bantuan, tolong.||I need help, please.", "Jam berapa sekarang?||What time is it?", "Saya mau istirahat sebentar.||I want to rest for a while.", "Tolong buka jendelanya.||Please open the window.", "Makanannya enak sekali.||The food is very delicious.", "Tolong ambilkan garam.||Please pass the salt.", "Saya mau minum air.||I'd like some water.", "Nanti malam kita telepon keluarga, ya.||Let's call the family tonight.", "Bagaimana cuaca hari ini?||How's the weather today?", "Saya sudah minum obat.||I've taken my medicine.", "Sampai jumpa besok!||See you tomorrow!", "Selamat ulang tahun!||Happy birthday!", "Di mana saya taruh ponsel saya?||Where did I put my phone?", "Tolong besarkan suaranya.||Please turn up the volume.", "Hari ini saya agak capek.||I'm a little tired today.", "Ayo duduk di sini dengan saya.||Come sit here with me.", "Itu ide yang bagus!||That's a good idea!", "Selamat tidur, mimpi indah.||Good night, sweet dreams."],
+      reading: ["Setiap pagi saya minum kopi di dekat jendela.||Every morning I drink coffee by the window.", "Cucu-cucu saya suka mendengar cerita saya.||My grandchildren love to hear my stories.", "Di pasar dijual bunga segar.||Fresh flowers are sold at the market.", "Langit hari ini biru dan indah.||The sky is blue and beautiful today.", "Saya bicara keras dan jelas supaya semua bisa dengar.||I speak loudly and clearly so everyone can hear."]
+    },
+
+    ta: { name: "Tamil", native: "தமிழ்", tts: "ta-IN",
+      ptk: ["பா · பா · பா · பா · பா", "டா · டா · டா · டா · டா", "கா · கா · கா · கா · கா", "பா-டா-கா · பா-டா-கா · பா-டா-கா"],
+      phrases: ["வணக்கம்!|Vanakkam!|Hello!", "காலை வணக்கம்.|Kaalai vanakkam.|Good morning.", "நீங்க எப்படி இருக்கீங்க?|Neenga eppadi irukkeenga?|How are you?", "நான் நல்லா இருக்கேன்.|Naan nallaa irukken.|I am fine.", "எனக்கு ஒரு காபி வேணும்.|Enakku oru kaapi venum.|I would like a coffee.", "கொஞ்சம் தண்ணி குடுங்க.|Konjam thanni kudunga.|Please give me some water.", "சாப்பாடு ரெடியா?|Saappaadu readyaa?|Is the food ready?", "டிவி போடுங்க.|TV podunga.|Please turn on the TV.", "என் குடும்பத்துக்கு போன் பண்ணுங்க.|En kudumbaththukku phone pannunga.|Please call my family.", "என் கண்ணாடி எங்கே?|En kannaadi enge?|Where are my glasses?", "வாங்க, வெளியே நடக்கலாம்.|Vaanga, veliye nadakkalaam.|Come, let's go for a walk.", "ரொம்ப நன்றி!|Romba nandri!|Thank you very much!", "நான் பேசுறது கேக்குதா?|Naan pesuradhu kekkudhaa?|Can you hear me?", "கொஞ்சம் மெதுவா பேசுங்க.|Konjam medhuvaa pesunga.|Please speak a little slower.", "எனக்கு கொஞ்சம் உதவி வேணும்.|Enakku konjam udhavi venum.|I need a little help.", "மணி என்ன ஆச்சு?|Mani enna aachu?|What time is it?", "கொஞ்ச நேரம் ஓய்வு எடுக்கிறேன்.|Konja neram oyvu edukkiren.|I'll rest for a while.", "ஜன்னலைத் திறந்து விடுங்க.|Jannalai thirandhu vidunga.|Please open the window.", "சாப்பாடு ரொம்ப ருசியா இருக்கு.|Saappaadu romba rusiyaa irukku.|The food is very tasty.", "கொஞ்சம் உப்பு குடுங்க.|Konjam uppu kudunga.|Please pass the salt.", "எனக்கு ஒரு டம்ளர் மோர் வேணும்.|Enakku oru tumbler mor venum.|I'd like a glass of buttermilk.", "இன்னிக்கு ராத்திரி வீட்டுக்கு போன் பண்ணலாம்.|Innikku raaththiri veettukku phone pannalaam.|Let's call home tonight.", "இன்னிக்கு வானிலை எப்படி இருக்கு?|Innikku vaanilai eppadi irukku?|How's the weather today?", "நான் மாத்திரை சாப்பிட்டுட்டேன்.|Naan maaththirai saappittutten.|I've taken my tablets.", "நாளைக்குப் பார்க்கலாம்!|Naalaikku paarkkalaam!|See you tomorrow!", "பிறந்தநாள் வாழ்த்துகள்!|Pirandhanaal vaazhthugal!|Happy birthday!", "என் போனை எங்கே வெச்சேன்?|En phone-ai enge vechchen?|Where did I put my phone?", "சத்தத்தைக் கொஞ்சம் கூட்டுங்க.|Saththaththai konjam koottunga.|Please turn up the volume.", "இன்னிக்கு கொஞ்சம் களைப்பா இருக்கு.|Innikku konjam kalaippaa irukku.|I'm a little tired today.", "வாங்க, என் பக்கத்துல உட்காருங்க.|Vaanga, en pakkaththula utkaarunga.|Come, sit beside me.", "இது நல்ல யோசனை!|Idhu nalla yosanai!|That's a good idea!", "இனிய இரவு, நல்லா தூங்குங்க.|Iniya iravu, nallaa thoongunga.|Good night, sleep well."],
+      reading: [
+        "தினமும் காலையில் நான் ஜன்னல் அருகே காபி குடிப்பேன்.|Thinamum kaalaiyil naan jannal arugae kaapi kudippen.|Every morning I drink coffee by the window.",
+        "என் பேரக்குழந்தைகளுக்கு என் கதைகள் கேட்க ரொம்ப பிடிக்கும்.|En perakkuzhandhaigalukku en kadhaigal ketka romba pidikkum.|My grandchildren love to hear my stories.",
+        "சந்தையில் புதிய மல்லிகைப் பூ விற்கிறார்கள்.|Sandhaiyil pudhiya malligai poo virkiraargal.|Fresh jasmine flowers are sold at the market.",
+        "கோவிலில் மாலை நேரத்தில் மணி சத்தமாக ஒலிக்கும்.|Kovilil maalai nerathil mani sathamaaga olikkum.|The temple bells ring loudly in the evening.",
+        "இன்று வானம் நீலமாகவும் அழகாகவும் இருக்கிறது.|Indru vaanam neelamaagavum azhagaagavum irukkiradhu.|Today the sky is blue and beautiful.",
+        "அகர முதல எழுத்தெல்லாம் ஆதி பகவன் முதற்றே உலகு.|Agara mudhala ezhuththellaam aadhi bhagavan mudhatre ulagu.|Thirukkural 1: as A is first of all letters, God is first of the world.",
+        "நான் சத்தமாகவும் தெளிவாகவும் பேசுகிறேன்.|Naan sathamaagavum thelivaagavum pesugiren.|I speak loudly and clearly."
+      ]
+    }
+  };
+  // Conditions: names and the home-screen tip for each. Parkinson's uses each language's main tip.
+  const CONDITIONS = ["pd", "stroke", "ms", "tbi", "aging", "general"];
+  const COND_TEXT = {
+ "en": {
+  "label": "Choose a practice style (optional)",
+  "names": {
+   "pd": "Loud voice (often for Parkinson's)",
+   "stroke": "Slow and clear (often after stroke)",
+   "ms": "Short and easy (often for MS)",
+   "tbi": "Breath and pacing (brain injury)",
+   "aging": "Strong, easy voice (aging voice)",
+   "general": "General voice practice"
+  },
+  "tips": {
+   "stroke": [
+    "Clear first, then loud.",
+    "Go slowly and make every sound clear. If finding words is the main difficulty, ask a speech specialist for exercises made for that."
+   ],
+   "ms": [
+    "Short and steady.",
+    "This plan uses short sessions with fewer rounds. Practice when you have the most energy, and rest when you feel tired."
+   ],
+   "tbi": [
+    "Slow and clear.",
+    "Take your time, breathe before each sentence, and make every sound clear."
+   ],
+   "aging": [
+    "Your voice needs exercise too.",
+    "Regular practice helps keep a voice strong. Drink water, and rest your voice if it feels strained."
+   ],
+   "general": [
+    "A strong, clear voice.",
+    "Practice a few minutes every day for a stronger, clearer voice. Stop if your throat hurts, and drink water."
+   ]
+  }
+ }
+};
+  const LANG_ORDER = ["en", "zh", "hi", "es", "ar", "fr", "bn", "pt", "ru", "id", "ta"];
+  const COUNT = ["1 · 2 · 3 · 4 · 5", "6 · 7 · 8 · 9 · 10", "10 · 9 · 8 · 7 · 6", "5 · 4 · 3 · 2 · 1"];
+  const PTK = ["pa · pa · pa · pa · pa", "ta · ta · ta · ta · ta", "ka · ka · ka · ka · ka", "pa-ta-ka · pa-ta-ka · pa-ta-ka"];
+  // English phrases from the first version; a saved copy of exactly these is not "custom".
+  const OLD_DEFAULTS = ["Good morning!", "I would like a cup of tea, please.", "Namaste! How are you today?", "Can you turn on the TV?", "Please call my son.", "What is for lunch today?", "I am feeling good today.", "Where are my glasses?", "Let's go for a walk.", "Thank you very much!"];
+
+  // ---------- storage (safe if blocked) ----------
+  const KEY = "amma-voice-v1";
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+  function detectLang() {
+    const prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || "en"];
+    for (const p of prefs) { const c = String(p).toLowerCase().split("-")[0]; if (LANGS[c]) return c; }
+    return "en";
+  }
+
+  const stored = load();
+  const S = Object.assign({ name: "", target: "normal", history: {}, mine: [], practice: "", withEnglish: false, script: "both", condition: "pd", phraseMode: "mix" }, stored);
+  if (!S.practice) {
+    const existing = Object.keys(S.history).length > 0;
+    if (stored.lang && stored.lang !== "en") S.practice = stored.lang;
+    else if (stored.second) { S.practice = stored.second; S.withEnglish = true; }
+    else if (existing) {
+      // First-version users (before languages existed) practiced English with Tamil.
+      S.practice = "ta"; S.withEnglish = true;
+      if (!stored.mine) S.mine = ["Please call my son.", "My granddaughter loves to hear my stories.", "என் பையனுக்கு போன் பண்ணுங்க.|En paiyanukku phone pannunga.|Please call my son."];
+    }
+    else S.practice = detectLang();
+  }
+  delete S.lang; delete S.second;
+  if (S.welcomed === undefined) S.welcomed = Object.keys(S.history).length > 0 || !!S.name;
+  if (Array.isArray(S.phrases)) {
+    if (S.phrases.join("\n") !== OLD_DEFAULTS.join("\n")) S.mine = S.phrases;
+    delete S.phrases;
+  }
+  if (!LANGS[S.practice]) S.practice = "en";
+
+  const L = () => LANGS.en;
+  const t = (k, v) => String(L().ui[k]).replace(/\{(\w+)\}/g, (_, x) => v && v[x] !== undefined ? v[x] : "");
+  const exT = (id) => Object.assign({}, L().ex[id], (EX_FOR[S.condition] || {})[id]);
+  const toItems = (arr, lang) => arr.map((x) => { const [text, sound, meaning] = x.split("|"); return { text, sound, meaning, lang }; });
+  // Everyday phrases: the first 4 of each language every day, plus 6 that rotate.
+  // The rotation is seeded by the date, so the day's set stays the same if the app is reopened.
+  const CORE = 4;
+  const dailyCount = () => S.condition === "ms" ? 6 : 10;
+  function seededShuffle(arr, seedText) {
+    let h = 2166136261;
+    for (const ch of seedText) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      h = Math.imul(h ^ (h >>> 15), 2246822507); h ^= h >>> 13;
+      const j = (h >>> 0) % (i + 1); [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function todaysPhrases(arr, lang) {
+    const daily = dailyCount();
+    if (S.phraseMode === "same" || arr.length <= daily) return arr.slice(0, daily);
+    return arr.slice(0, CORE).concat(seededShuffle(arr.slice(CORE), dayKey() + lang).slice(0, daily - CORE));
+  }
+  const pool = (lang, kind) => kind === "phrases" ? todaysPhrases(LANGS[lang].phrases, lang) : LANGS[lang][kind];
+
+  // Own phrases first, then English (when chosen), then the practice language.
+  function practiceItems(kind) {
+    const p = S.practice;
+    let items = kind === "phrases" ? toItems(S.mine, p) : [];
+    if (p === "en" || S.withEnglish) items = items.concat(toItems(pool("en", kind), "en"));
+    if (p !== "en") items = items.concat(toItems(pool(p, kind), p));
+    return items;
+  }
+  function languageOptions() {
+    return LANG_ORDER.map((c) => `<option value="${c}">${esc(LANGS[c].name)}${c === "en" ? "" : " · " + esc(LANGS[c].native)}</option>`).join("");
+  }
+
+  const ALL_EX = {
+    ahh: { id: "ahh", type: "hold", reps: 5 },
+    high: { id: "high", type: "timed", secs: 5, reps: 5 },
+    low: { id: "low", type: "timed", secs: 5, reps: 5 },
+    count: { id: "count", type: "prompt", items: () => toItems(COUNT, "en") },
+    ptk: { id: "ptk", type: "prompt", items: () => toItems(S.script === "latin" ? PTK : (LANGS[S.practice].ptk || PTK), S.practice) },
+    phrases: { id: "phrases", type: "prompt", items: () => practiceItems("phrases") },
+    read: { id: "read", type: "prompt", items: () => practiceItems("reading") },
+    breath: { id: "breath", type: "prompt", items: () => practiceItems("reading") }
+  };
+  // Each condition gets the exercises its research points to:
+  //  - Parkinson's: loudness first (sustained "Ahh"), pitch range, then loud speech.
+  //  - Stroke: loudness plus slow, clear speech (rate control) and sound drills.
+  //  - Brain injury: breath-group practice (one sentence per breath), loudness and slow, clear speech.
+  //  - MS: short sessions to avoid fatigue, with breath support and fewer rounds.
+  //  - Aging voice: sustained tones and pitch slides plus loud functional phrases.
+  const PLANS = {
+    pd:      { minutes: 20, steps: [["ahh"], ["high"], ["low"], ["count"], ["ptk"], ["phrases"], ["read"]] },
+    stroke:  { minutes: 15, steps: [["ahh"], ["ptk"], ["count"], ["phrases"], ["read"]] },
+    tbi:     { minutes: 15, steps: [["breath", { limit: 5 }], ["ahh"], ["ptk"], ["phrases"]] },
+    ms:      { minutes: 10, steps: [["breath", { limit: 3 }], ["ahh", { reps: 3 }], ["phrases"]] },
+    aging:   { minutes: 15, steps: [["ahh"], ["high"], ["low"], ["phrases"], ["read"]] },
+    general: { minutes: 20, steps: [["ahh"], ["high"], ["low"], ["count"], ["ptk"], ["phrases"], ["read"]] }
+  };
+  // Instructions that change by condition (anything not listed uses the standard text).
+  const EX_FOR = {
+    stroke: {
+      phrases: { name: "Slow, clear phrases", short: "Every sound clear, then normal speed", how: "Say each phrase slowly, one syllable at a time, like tapping a beat. Make every sound clear. Then say it once more at your normal speed, still clear and strong.", tip: "Clear first, then speed." },
+      ptk: { how: "Say each sound slowly and clearly first. Speed up only while every sound stays clear.", tip: "Clear beats fast." },
+      count: { how: "Count slowly and clearly. Tap your hand on the table once for each number.", tip: "One tap, one number." },
+      read: { how: "Read each sentence slowly. Pause at each comma and full stop, and make every sound clear.", tip: "Slow and clear." }
+    },
+    tbi: {
+      phrases: { name: "Slow, clear phrases", short: "Every sound clear, then normal speed", how: "Say each phrase slowly, one syllable at a time, like tapping a beat. Make every sound clear. Then say it once more at your normal speed, still clear and strong.", tip: "Clear first, then speed." },
+      ptk: { how: "Say each sound slowly and clearly first. Speed up only while every sound stays clear.", tip: "Clear beats fast." }
+    },
+    ms: {
+      ahh: { tip: "Strong but comfortable. Stop before you feel tired." },
+      phrases: { tip: "Rest between phrases whenever you need." },
+      breath: { tip: "Slow, calm breaths. Rest whenever you need." }
+    },
+    aging: {
+      ahh: { tip: "Strong and easy. Never squeeze or strain your throat." },
+      high: { tip: "Smooth and easy, with no strain." },
+      low: { tip: "Smooth and easy, with no strain." }
+    }
+  };
+  let EX = [];
+  function buildPlan() {
+    EX = (PLANS[S.condition] || PLANS.pd).steps.map(([id, opts]) => Object.assign({}, ALL_EX[id], opts || {}));
+  }
+  const repsFor = (ex) => ex.reps;
+  const condText = () => COND_TEXT.en;
+  function condOptions() {
+    return CONDITIONS.map((c) => `<option value="${c}">${esc(condText().names[c])}</option>`).join("");
+  }
+
+  function applyLang() {
+    document.documentElement.lang = "en";
+    document.documentElement.dir = "ltr";
+  }
+
+  // ---------- dates / history ----------
+  const dayKey = (d = new Date()) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const today = () => { const k = dayKey(); S.history[k] = S.history[k] || { done: {}, ahh: [] }; return S.history[k]; };
+  const dayBest = (k) => { const h = S.history[k]; return h && h.ahh.length ? Math.max(...h.ahh) : 0; };
+  const practiced = (k) => { const h = S.history[k]; return !!h && Object.keys(h.done).length > 0; };
+  function streak() {
+    let n = 0; const d = new Date();
+    if (!practiced(dayKey(d))) d.setDate(d.getDate() - 1);
+    while (practiced(dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function weekCount() { let n = 0; const d = new Date(); for (let i = 0; i < 7; i++) { if (practiced(dayKey(d))) n++; d.setDate(d.getDate() - 1); } return n; }
+  function bestEver() { return Math.max(0, ...Object.keys(S.history).map(dayBest)); }
+
+  // ---------- microphone ----------
+  const TARGETS = { easier: 0.45, normal: 0.6, harder: 0.72 };
+  const mic = { state: "off", level: 0 };
+  async function startMic() {
+    if (mic.state === "on" || mic.state === "asking") return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { mic.state = "none"; return; }
+    mic.state = "asking";
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const an = ctx.createAnalyser(); an.fftSize = 1024; ctx.createMediaStreamSource(stream).connect(an);
+      const buf = new Float32Array(an.fftSize);
+      mic.state = "on";
+      const tick = () => {
+        an.getFloatTimeDomainData(buf);
+        let sum = 0; for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+        const db = 20 * Math.log10(Math.sqrt(sum / buf.length) + 1e-8); // dBFS, about -90..0
+        mic.level = mic.level * 0.6 + Math.min(1, Math.max(0, (db + 60) / 55)) * 0.4;
+        onLevel(mic.level);
+        requestAnimationFrame(tick);
+      };
+      tick();
+    } catch (e) { mic.state = "denied"; }
+    if (current) renderMeterBox();
+  }
+
+  // ---------- speech (read instructions aloud) ----------
+  function speak(text) {
+    try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "en-US"; u.rate = 0.9; speechSynthesis.speak(u); } catch (e) {}
+  }
+
+  // ---------- keep screen awake ----------
+  let lock = null;
+  async function wake() { try { if (!lock && navigator.wakeLock) { lock = await navigator.wakeLock.request("screen"); lock.addEventListener("release", () => lock = null); } } catch (e) {} }
+
+  // ---------- rendering ----------
+  const app = document.getElementById("app");
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  let current = null;
+  let timerId = 0;
+
+  function greeting() { const h = new Date().getHours(); return t(h < 12 ? "morning" : h < 17 ? "afternoon" : "evening"); }
+
+  function home() {
+    stopTimer(); current = null;
+    const tdy = today();
+    const doneCount = EX.filter((e) => tdy.done[e.id]).length;
+    const next = EX.find((e) => !tdy.done[e.id]);
+    app.innerHTML = `
+      <div class="top">
+        <div><p class="eyebrow">${t("eyebrow")}</p><h1>${greeting()}${S.name ? ", " + esc(S.name) : ""}</h1></div>
+        <div class="top-actions">
+          <button class="icon-btn" id="settings" aria-label="${t("settings")}">⚙️</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div><h2>${doneCount === EX.length ? t("allDoneToday") : t("today")}</h2>
+        <p class="muted">${t("doneOf", { d: doneCount, n: EX.length, m: (PLANS[S.condition] || PLANS.pd).minutes })}</p></div>
+        ${next ? `<button class="btn btn-primary btn-big pulse" id="go">${doneCount ? t("cont") : t("start")}: ${exT(next.id).name}</button>`
+               : `<button class="btn btn-ghost" id="again">${t("again")}</button>`}
+        <ul class="ex-list">
+          ${EX.map((e) => `<li><button class="ex-item ${tdy.done[e.id] ? "done" : ""}" data-ex="${e.id}">
+            <span class="chk" aria-hidden="true">${tdy.done[e.id] ? "✓" : ""}</span>
+            <span class="t"><b>${exT(e.id).name}</b><small>${exT(e.id).short}</small></span></button></li>`).join("")}
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>${t("progress")}</h2>
+        <div class="stats">
+          <div class="stat"><b>${streak()}</b><span>${t("streak")}</span></div>
+          <div class="stat"><b>${weekCount()}/7</b><span>${t("week")}</span></div>
+          <div class="stat"><b>${bestEver().toFixed(1)}s</b><span>${t("longest")}</span></div>
+        </div>
+        <div><h3>${t("chartTitle")}</h3><p class="note">${t("chartNote")}</p></div>
+        ${chart()}
+      </div>
+
+      <div class="tip">${S.condition === "pd" ? `<b>${t("tipTitle")}</b> ${t("tip")}` : `<b>${esc(condText().tips[S.condition][0])}</b> ${esc(condText().tips[S.condition][1])}`}</div>
+      <button class="btn btn-ghost" id="share">${t("share")}</button>
+      <div class="safety">
+        <p>${t("disclaimer")} ${t("safetyShort")}</p>
+        <p><b>${t("emergency")}</b></p>
+        <button class="linkish" id="about">${t("aboutLink")}</button>
+      </div>
+      <p class="note" dir="ltr">© 2026 Speech Practice · All rights reserved</p>`;
+    app.querySelector("#settings").onclick = settings;
+    app.querySelector("#about").onclick = () => { settings(); const a = document.getElementById("about-card"); if (a) a.scrollIntoView(); };
+    app.querySelector("#share").onclick = share;
+    const go = app.querySelector("#go"); if (go) go.onclick = () => intro(next);
+    const again = app.querySelector("#again"); if (again) again.onclick = () => intro(EX[0]);
+    app.querySelectorAll("[data-ex]").forEach((b) => b.onclick = () => intro(EX.find((e) => e.id === b.dataset.ex)));
+  }
+
+  // Anonymous milestone counts for the visitor counter. Never includes names or phrases.
+  function track(name) {
+    try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: name, event: true }); } catch (e) {}
+  }
+
+  // Terms must be accepted once per device. Changing TERMS_VERSION asks everyone to accept again.
+  const TERMS_VERSION = "2026-10-15";
+  const hasAgreed = () => S.agreed === TERMS_VERSION;
+  function start() {
+    if (!hasAgreed()) return terms();
+    S.welcomed ? home() : welcome();
+  }
+  function terms() {
+    app.innerHTML = `
+      <div class="card">
+        <p class="eyebrow">${t("eyebrow")}</p>
+        <h1>${t("termsTitle")}</h1>
+        <p>${t("termsIntro")}</p>
+        <ul class="about">${L().ui.termsPoints.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+        <details class="full-terms">
+          <summary>${t("showFull")}</summary>
+          <h3>${t("aboutTitle")}</h3>
+          <ul class="about">${L().ui.about.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+          <h3>${t("privacyTitle")}</h3>
+          <ul class="about">${L().ui.privacy.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+        </details>
+        <label class="check-row" for="tc-age"><input type="checkbox" id="tc-age"> ${t("checkAge")}</label>
+        <label class="check-row" for="tc-agree"><input type="checkbox" id="tc-agree"> ${t("checkAgree")}</label>
+        <button class="btn btn-primary btn-big" id="tc-yes" disabled>${t("agreeBtn")}</button>
+        <button class="btn btn-ghost" id="tc-no">${t("declineBtn")}</button>
+        <p class="safety" id="tc-msg" hidden>${t("declined")}</p>
+      </div>`;
+    const age = app.querySelector("#tc-age"), ok = app.querySelector("#tc-agree"), yes = app.querySelector("#tc-yes");
+    const sync = () => { yes.disabled = !(age.checked && ok.checked); };
+    age.onchange = sync; ok.onchange = sync;
+    yes.onclick = () => {
+      if (yes.disabled) return;
+      S.agreed = TERMS_VERSION; S.agreedAt = new Date().toISOString(); save(); track("agreed"); start();
+    };
+    app.querySelector("#tc-no").onclick = () => { app.querySelector("#tc-msg").hidden = false; };
+  }
+
+  function welcome() {
+    app.innerHTML = `
+      <div class="card">
+        <h1>${t("welcome")}</h1>
+        <label for="w-name">${t("askName")}<input id="w-name" autocomplete="given-name" value="${esc(S.name)}"></label>
+        <p class="note">${t("nameNote")}</p>
+        <label for="w-practice">${t("practiceLabel")}
+          <select id="w-practice">${languageOptions()}</select></label>
+        <label class="check-row" for="w-english" id="w-english-row"><input type="checkbox" id="w-english"> ${t("withEnglish")}</label>
+        <p class="note">${t("practiceNote")}</p>
+        <label for="w-cond">${esc(condText().label)}
+          <select id="w-cond">${condOptions()}</select></label>
+        <label for="w-script">${t("scriptLabel")}
+          <select id="w-script">
+            <option value="both">${t("scriptBoth")}</option>
+            <option value="latin">${t("scriptLatin")}</option>
+            <option value="native">${t("scriptNative")}</option>
+          </select></label>
+        <button class="btn btn-primary btn-big" id="w-go">${t("start")}</button>
+        <button class="btn btn-ghost" id="w-skip">${t("skip")}</button>
+      </div>
+      <div class="safety">
+        <p>${t("disclaimer")} ${t("safetyShort")}</p>
+        <p><b>${t("emergency")}</b></p>
+      </div>`;
+    app.querySelector("#w-script").value = S.script;
+    app.querySelector("#w-cond").value = S.condition;
+    const wp = app.querySelector("#w-practice"), we = app.querySelector("#w-english");
+    wp.value = S.practice; we.checked = S.withEnglish;
+    const syncEnglish = () => { app.querySelector("#w-english-row").hidden = wp.value === "en"; };
+    wp.onchange = syncEnglish; syncEnglish();
+    const done = (name) => { S.practice = wp.value; S.withEnglish = we.checked; track("practice-" + S.practice); S.name = name; S.script = app.querySelector("#w-script").value; S.condition = app.querySelector("#w-cond").value; buildPlan(); S.welcomed = true; save(); track("welcome"); home(); };
+    app.querySelector("#w-go").onclick = () => done(app.querySelector("#w-name").value.trim());
+    app.querySelector("#w-skip").onclick = () => done("");
+  }
+
+  async function share() {
+    track("share");
+    const btn = app.querySelector("#share");
+    try { if (navigator.share) { await navigator.share({ title: "Speech Practice", url: SHARE_URL }); return; } } catch (e) { return; }
+    try { await navigator.clipboard.writeText(SHARE_URL); btn.textContent = t("copied") + " ✓"; }
+    catch (e) { btn.textContent = SHARE_URL; }
+  }
+
+  function chart() {
+    const days = []; const d = new Date(); d.setDate(d.getDate() - 13);
+    for (let i = 0; i < 14; i++) { days.push({ label: d.getDate(), v: dayBest(dayKey(d)) }); d.setDate(d.getDate() + 1); }
+    const max = Math.max(10, Math.ceil(Math.max(...days.map((x) => x.v)) / 5) * 5);
+    const W = 560, H = 220, L0 = 34, B = 30, T = 12, bw = (W - L0) / 14;
+    const y = (v) => T + (H - T - B) * (1 - v / max);
+    let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("chartTitle"))}" direction="ltr">`;
+    [0, max / 2, max].forEach((g) => { s += `<line x1="${L0}" x2="${W}" y1="${y(g)}" y2="${y(g)}" stroke="var(--line)" stroke-width="1"/><text x="${L0 - 6}" y="${y(g) + 5}" text-anchor="end">${g}</text>`; });
+    days.forEach((x, i) => {
+      const cx = L0 + i * bw + bw * 0.18, w = bw * 0.64, isToday = i === 13;
+      if (x.v > 0) s += `<rect x="${cx}" y="${y(x.v)}" width="${w}" height="${y(0) - y(x.v)}" rx="4" fill="${isToday ? "var(--marigold)" : "var(--teal)"}"/>`;
+      else s += `<rect x="${cx}" y="${y(0) - 3}" width="${w}" height="3" rx="1.5" fill="var(--line)"/>`;
+      s += `<text x="${cx + w / 2}" y="${H - 8}" text-anchor="middle">${x.label}</text>`;
+    });
+    return s + `</svg>`;
+  }
+
+  function intro(ex) {
+    stopTimer();
+    const tx = exT(ex.id);
+    current = { ex, i: 0, phase: "intro", items: ex.type === "prompt" ? ex.items().slice(0, ex.limit || undefined) : null };
+    current.total = current.items ? current.items.length : repsFor(ex);
+    app.innerHTML = `
+      <div class="top"><button class="icon-btn" id="back">${t("home")}</button><span class="eyebrow">${t("of", { i: EX.indexOf(ex) + 1, n: EX.length })}</span></div>
+      <div class="card">
+        <h1>${tx.name}</h1>
+        <p style="font-size:1.15rem">${esc(tx.how)}</p>
+        <p class="muted">${t(ex.type === "prompt" ? "toSay" : "times", { n: current.total })} · ${esc(tx.tip)}</p>
+        ${ex.id === "phrases" && S.phraseMode !== "same" ? `<p class="note">${t("mixNote", { n: dailyCount() - CORE })}</p>` : ""}
+        <button class="btn btn-ghost" id="hear">${t("hear")}</button>
+      </div>
+      <button class="btn btn-primary btn-big" id="begin">${t("begin")}</button>`;
+    app.querySelector("#back").onclick = home;
+    app.querySelector("#hear").onclick = () => speak(tx.name + ". " + tx.how + " " + tx.tip);
+    app.querySelector("#begin").onclick = () => { startMic(); wake(); rep(); };
+  }
+
+  function repDots() {
+    return `<div class="reps" aria-label="${esc(t("of", { i: current.i + 1, n: current.total }))}">${Array.from({ length: current.total }, (_, k) =>
+      `<i class="${k < current.i ? "on" : k === current.i ? "now" : ""}"></i>`).join("")}</div>`;
+  }
+
+  function meterHTML() {
+    if (mic.state === "on") {
+      const tgt = TARGETS[S.target] * 100;
+      return `<div class="meter"><div class="meter-track"><div class="meter-fill" id="mfill"></div><div class="meter-target" style="inset-inline-start:${tgt}%"></div></div>
+        <div class="meter-label"><span>${t("soft")}</span><span>${t("target")} ▲</span><span>${t("loud")}</span></div>
+        <div class="meter-say" id="msay" aria-live="polite"></div></div>`;
+    }
+    if (mic.state === "asking") return `<p class="note" style="text-align:center">${t("allowMic")}</p>`;
+    if (mic.state === "denied" || mic.state === "none") return `<p class="note" style="text-align:center">${t("micOff")}</p>`;
+    return "";
+  }
+  function renderMeterBox() { const box = document.getElementById("meterbox"); if (box) box.innerHTML = meterHTML(); }
+
+  function onLevel(v) {
+    const fill = document.getElementById("mfill"), say = document.getElementById("msay");
+    const tgt = TARGETS[S.target];
+    if (fill) { fill.style.width = (v * 100).toFixed(1) + "%"; fill.classList.toggle("loud", v >= tgt); }
+    if (say) {
+      if (v < 0.15) { say.textContent = ""; say.className = "meter-say"; }
+      else if (v < tgt) { say.textContent = t("louder"); say.className = "meter-say warn"; }
+      else { say.textContent = t("great"); say.className = "meter-say good"; }
+    }
+    if (current && current.phase === "holding") holdAuto(v);
+  }
+
+  function rep() {
+    const { ex, i } = current;
+    current.phase = "ready";
+    let body = "";
+    if (ex.type === "hold") body = `<div class="timer" id="clock">0.0<small>s</small></div>
+        <button class="btn btn-teal btn-big" id="act">${t("holdBtn")}</button>`;
+    else if (ex.type === "timed") body = `<div class="timer" id="clock">${ex.secs}<small>s</small></div>
+        <button class="btn btn-teal btn-big" id="act">${t("tapAhh")}</button>`;
+    else {
+      const it = current.items[i];
+      // English letters only: show the pronunciation as the main text. The meaning shows when the phrase is not in the app's language.
+      const latin = S.script === "latin" && it.sound;
+      const main = latin ? it.sound : it.text;
+      const meaning = it.lang !== "en" ? it.meaning : "";
+      const dir = latin ? "ltr" : (LANGS[it.lang].dir || "ltr");
+      body = `<div class="prompt ${main.length > 30 ? "long" : ""}" lang="${latin ? "en" : it.lang}" dir="${dir}">${esc(main)}</div>`;
+      const sound = S.script === "both" ? it.sound : "";
+      if (sound || meaning) body += `<p class="prompt-sub" dir="ltr">${sound ? `<b>${esc(sound)}</b>` : ""}${meaning ? `<span>${esc(meaning)}</span>` : ""}</p>`;
+      if (ex.id === "count" && S.practice !== "en") body += `<p class="prompt-sub"><span>${t("sayIn", { lang: LANGS[S.practice].name })}</span></p>`;
+      body += `<button class="btn btn-teal btn-big" id="act">${i + 1 < current.total ? t("saidNext") : t("saidFinish")}</button>`;
+    }
+    app.innerHTML = `
+      <div class="top"><button class="icon-btn" id="back">${t("home")}</button><h2>${exT(ex.id).name}</h2></div>
+      ${repDots()}
+      <div class="card">${body}<div id="meterbox">${meterHTML()}</div></div>
+      <p class="muted" style="text-align:center">${esc(exT(ex.id).tip)}</p>`;
+    app.querySelector("#back").onclick = home;
+    const act = app.querySelector("#act");
+    if (ex.type === "hold") act.onclick = () => current.phase === "holding" ? endHold() : startHold(act);
+    else if (ex.type === "timed") act.onclick = () => startCountdown(act);
+    else act.onclick = nextRep;
+  }
+
+  function startHold(btn) {
+    current.phase = "holding"; current.t0 = performance.now(); current.heard = false; current.quietSince = 0;
+    btn.textContent = t("stop"); btn.className = "btn btn-primary btn-big";
+    const clock = document.getElementById("clock");
+    timerId = setInterval(() => { clock.innerHTML = ((performance.now() - current.t0) / 1000).toFixed(1) + "<small>s</small>"; }, 100);
+  }
+  // With the mic on, stop by itself once the voice has started and then gone quiet for a moment.
+  function holdAuto(v) {
+    const now = performance.now();
+    if (v > 0.3) { current.heard = true; current.quietSince = 0; current.lastVoice = now; }
+    else if (current.heard) { if (!current.quietSince) current.quietSince = now; if (now - current.quietSince > 1200) endHold(current.lastVoice); }
+  }
+  function endHold(endAt) {
+    if (current.phase !== "holding") return;
+    stopTimer(); current.phase = "done";
+    const secs = Math.max(0, ((endAt || performance.now()) - current.t0) / 1000);
+    today().ahh.push(Math.round(secs * 10) / 10); save();
+    const prevBest = Math.max(0, ...Object.keys(S.history).filter((k) => k !== dayKey()).map(dayBest));
+    const msg = prevBest && secs > prevBest ? t("record") : secs >= 10 ? t("strong") : t("good");
+    rest(secs.toFixed(1), msg, "s");
+  }
+
+  function startCountdown(btn) {
+    btn.disabled = true; btn.textContent = t("holdIt");
+    current.phase = "counting";
+    const clock = document.getElementById("clock"); const end = performance.now() + current.ex.secs * 1000;
+    timerId = setInterval(() => {
+      const left = Math.max(0, (end - performance.now()) / 1000);
+      clock.innerHTML = Math.ceil(left) + "<small>s</small>";
+      if (left <= 0) { stopTimer(); rest("✓", t("nice")); }
+    }, 100);
+  }
+
+  function stopTimer() { clearInterval(timerId); timerId = 0; }
+
+  function rest(big, msg, unit) {
+    const last = current.i + 1 >= current.total;
+    app.querySelector(".card").innerHTML = `
+      <div class="timer">${esc(big)}${unit ? `<small>${unit}</small>` : ""}</div>
+      <p class="meter-say good">${esc(msg)}</p>
+      <p class="muted" style="text-align:center">${last ? t("lastOne") : t("rest")}</p>
+      <button class="btn btn-teal btn-big" id="act">${last ? t("finish") : t("nextOne")}</button>`;
+    app.querySelector("#act").onclick = nextRep;
+  }
+
+  function nextRep() {
+    current.i++;
+    if (current.i < current.total) return rep();
+    today().done[current.ex.id] = true; save(); track("done-" + current.ex.id);
+    finished(current.ex);
+  }
+
+  function finished(ex) {
+    current = null;
+    const tdy = today(); const next = EX.find((e) => !tdy.done[e.id]);
+    const all = !next;
+    let extra = "";
+    if (ex.id === "ahh" && tdy.ahh.length) extra = `<p style="text-align:center">${t("longestToday", { s: Math.max(...tdy.ahh).toFixed(1) })}</p>`;
+    app.innerHTML = `
+      <div class="card" style="text-align:center">
+        <div class="celebrate" aria-hidden="true">${all ? "🌼" : "👏"}</div>
+        <h1>${all ? t("allDone") : t("exDone", { ex: exT(ex.id).name })}</h1>
+        ${extra}
+        <p class="muted">${all ? (S.name ? esc(S.name) + ", " : "") + t("wonderful") : t("keepGoing")}</p>
+      </div>
+      ${next ? `<button class="btn btn-primary btn-big" id="next">${t("next")}: ${exT(next.id).name}</button>` : ""}
+      <button class="btn btn-ghost" id="home">${t("backHome")}</button>`;
+    if (all) track("all-done");
+    if (all) speak(t("allDone") + " " + t("wonderful"));
+    const n = app.querySelector("#next"); if (n) n.onclick = () => intro(next);
+    app.querySelector("#home").onclick = home;
+  }
+
+  function settings() {
+    app.innerHTML = `
+      <div class="top"><button class="icon-btn" id="back">${t("home")}</button><h1>${t("settings")}</h1></div>
+      <div class="card">
+        <label for="s-name">${t("nameLabel")}<input id="s-name" value="${esc(S.name)}"></label>
+        <label for="s-cond">${esc(condText().label)}
+          <select id="s-cond">${condOptions()}</select></label>
+        <label for="s-target">${t("targetLabel")}
+          <select id="s-target">
+            <option value="easier">${t("easier")}</option>
+            <option value="normal">${t("normal")}</option>
+            <option value="harder">${t("harder")}</option>
+          </select></label>
+        <label for="s-practice">${t("practiceLabel")}
+          <select id="s-practice">${languageOptions()}</select></label>
+        <label class="check-row" for="s-english" id="s-english-row"><input type="checkbox" id="s-english"> ${t("withEnglish")}</label>
+        <label for="s-phrases">${t("phraseModeLabel")}
+          <select id="s-phrases">
+            <option value="mix">${t("phraseMix")}</option>
+            <option value="same">${t("phraseSame")}</option>
+          </select></label>
+        <label for="s-script">${t("scriptLabel")}
+          <select id="s-script">
+            <option value="both">${t("scriptBoth")}</option>
+            <option value="latin">${t("scriptLatin")}</option>
+            <option value="native">${t("scriptNative")}</option>
+          </select></label>
+        <label for="s-mine">${t("myPhrases")}<textarea id="s-mine">${esc(S.mine.join("\n"))}</textarea></label>
+        <button class="btn btn-primary" id="save">${t("save")}</button>
+      </div>
+      <div class="card" id="about-card">
+        <h3>${t("aboutTitle")}</h3>
+        ${S.agreedAt ? `<p class="note">${t("agreedOn", { date: new Date(S.agreedAt).toLocaleDateString() })}</p>` : ""}
+        <ul class="about">${L().ui.about.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+        <p><b>${t("emergency")}</b></p>
+      </div>
+      <div class="card" id="privacy-card">
+        <h3>${t("privacyTitle")}</h3>
+        <ul class="about">${L().ui.privacy.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+      </div>
+      <div class="card">
+        <h3>${t("resetTitle")}</h3>
+        <p class="muted">${t("resetDesc")}</p>
+        <button class="btn btn-ghost" id="reset">${t("resetBtn")}</button>
+      </div>`;
+    app.querySelector("#s-target").value = S.target;
+    const sp = app.querySelector("#s-practice"), se = app.querySelector("#s-english");
+    sp.value = S.practice; se.checked = S.withEnglish;
+    const syncEnglish = () => { app.querySelector("#s-english-row").hidden = sp.value === "en"; };
+    sp.onchange = syncEnglish; syncEnglish();
+    app.querySelector("#s-script").value = S.script;
+    app.querySelector("#s-cond").value = S.condition;
+    app.querySelector("#s-phrases").value = S.phraseMode;
+    app.querySelector("#back").onclick = home;
+    app.querySelector("#save").onclick = () => {
+      S.name = app.querySelector("#s-name").value.trim();
+      S.target = app.querySelector("#s-target").value;
+      if (sp.value !== S.practice) track("practice-" + sp.value);
+      S.practice = sp.value; S.withEnglish = se.checked;
+      S.script = app.querySelector("#s-script").value;
+      S.condition = app.querySelector("#s-cond").value; buildPlan();
+      S.phraseMode = app.querySelector("#s-phrases").value;
+      S.mine = app.querySelector("#s-mine").value.split("\n").map((x) => x.trim()).filter(Boolean);
+      save(); home();
+    };
+    const reset = app.querySelector("#reset");
+    reset.onclick = () => {
+      if (reset.dataset.armed) { S.history = {}; save(); home(); return; }
+      reset.dataset.armed = "1"; reset.textContent = t("resetConfirm"); reset.className = "btn btn-primary";
+    };
+  }
+
+  applyLang();
+  buildPlan();
+  start();
+})();
+</script>
+</html>

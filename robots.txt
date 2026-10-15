@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://speechpractice.github.io/sitemap.xml
