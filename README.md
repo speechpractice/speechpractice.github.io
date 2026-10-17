@@ -29,6 +29,12 @@ The app has two sections, switched with tabs at the top.
 
 ### 🗣️ Speak
 
+- **Spoken coach tips.** After each round, a short spoken tip based on how much of the round
+  reached the loudness target (for example "Great, nice and loud!" or "Take a big breath first,
+  then go louder"). It is worked out on the phone from the loudness meter: no recording, no AI
+  service, nothing sent anywhere. It comments only on loudness and never changes the plan. It
+  can be turned off in Settings.
+
 - Users can choose a practice style. Styles adjust pacing and the number of rounds; they are
   not treatment plans. The table shows each style and the people who often choose it:
 

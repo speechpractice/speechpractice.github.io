@@ -140,6 +140,9 @@ textarea { min-height: 200px; resize: vertical; }
 select { font-size: .9rem; text-overflow: ellipsis; }
 .safety { border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: .85rem; color: var(--muted); display: flex; flex-direction: column; gap: 8px; }
 .safety b { color: var(--ink); }
+.coach { text-align: center; font-family: var(--display); font-weight: 600; font-size: 1.1rem; background: var(--teal-soft); border-radius: 12px; padding: 10px 14px; }
+.coach.warn { color: var(--warn); }
+.coach.good { color: var(--good); }
 .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--teal-soft); padding: 6px; border-radius: 16px; }
 .tab { min-height: 56px; background: transparent; color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 1.05rem; border-radius: 12px; }
 .tab.on { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
@@ -188,7 +191,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         termsPoints: ["This is a free practice tool for general voice, speaking and gentle physical activity. It is not a prescription, not medical advice and not a medical device.", "Physical exercise can cause falls or injury. Use a sturdy chair or counter for support and have someone nearby if you feel unsteady.", "Check with your medical practitioner before starting, and follow their advice over this app.", "Stop if you feel pain, strain, dizziness, chest discomfort or shortness of breath.", "If speech suddenly becomes slurred or hard to understand, call your local emergency number right away. It can be a sign of a stroke.", "You use this app at your own risk. To the fullest extent permitted by law, its creator is not liable for any injury, loss or unintended consequence.", "Your name and practice history stay on this device."],
         showFull: "Read the full terms and privacy notice", checkAge: "I am 18 or older, or I am a caregiver setting this up for an adult.", checkAgree: "I have read and agree to these terms. I understand this is not medical advice and I use this app at my own risk.",
         agreeBtn: "I agree", declineBtn: "I do not agree", declined: "Speak & Move can only be used after you agree to these terms. If you are unsure, talk to your doctor or speech specialist first. You can come back anytime.", agreedOn: "You agreed to these terms on {date}.",
-        privacy: ["Your name, phrases, settings and practice history are saved only on this device. They are never sent to us or anyone else. Clearing your browser data deletes them.", "On the public website, an anonymous visitor counter (GoatCounter) counts page visits, which exercises are finished, and which practice language is chosen. It uses no cookies and does not record your name, phrases, practice style or anything you type. Your IP address is not stored.", "There are no accounts, ads or tracking across other websites. Questions: open an issue at github.com/speechpractice/speechpractice.github.io."], aboutLink: "Read about safety",
+        privacy: ["Your name, phrases, settings and practice history are saved only on this device. They are never sent to us or anyone else. Clearing your browser data deletes them.", "On the public website, an anonymous visitor counter (GoatCounter) counts page visits, which exercises are finished, and which practice language is chosen. It uses no cookies and does not record your name, phrases, practice style or anything you type. Your IP address is not stored.", "The spoken coach tips are worked out on this device from the loudness meter. Your voice is never recorded or sent anywhere.", "There are no accounts, ads or tracking across other websites. Questions: open an issue at github.com/speechpractice/speechpractice.github.io."], aboutLink: "Read about safety",
         about: ["Intended purpose: Speak & Move is intended to help adults keep a regular habit of general voice, speaking and gentle physical activity practice for everyday wellbeing. It is not intended to diagnose, prevent, monitor, treat or alleviate any disease, injury or disability, and it does not replace or direct any professional care.", "This is not a prescription and not medical advice. Check with your medical practitioner for medical advice about your condition and treatment.", "It is not a medical device. It has not been reviewed, cleared or approved by any health regulator, such as the FDA (US), CDSCO (India), or regulators in the EU, UK, Canada or Australia.", "Practice styles adjust pacing, the number of rounds and which exercises are shown. They are not treatment plans for any condition.", "Physical exercise carries a risk of falls and injury. Use a sturdy chair or counter for support, clear the floor, and have someone nearby if you feel unsteady. Use the seated routine if you have fallen recently or feel unsteady. The exercise safety check is a simple guide, not a medical assessment.", "The loudness meter is a rough practice guide from your phone's microphone. It is not a calibrated measurement and should not be used for medical decisions.", "Talk to your doctor or speech specialist before starting, and follow their advice over this app. This matters most after a recent stroke, surgery or injury.", "Stop and rest if you feel pain, strain, dizziness, faintness, chest discomfort or unusual shortness of breath.", "This app is for adults. It is not designed for children, ALS (motor neurone disease), stuttering, or trouble finding words (aphasia). Ask a speech specialist for exercises suited to those.", "Healthcare professionals who recommend this app should first check the rules of their local regulator and professional body, and follow their own clinical judgment.", "Use at your own risk. To the fullest extent permitted by law, the creator of this app is not liable for any injury, loss or unintended consequence arising from its use. Nothing here limits rights you have, or liability that cannot be limited, under the law of your country.", "The exercises are common voice-practice and general fitness exercises. The app is independent and not affiliated with or endorsed by any commercial voice or exercise program."],
         home: "‹ Home", of: "{i} of {n}", times: "{n} times", toSay: "{n} to say", hear: "🔊 Read this to me", begin: "Begin",
         soft: "soft", target: "target", loud: "loud",
@@ -955,11 +958,46 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       else { say.textContent = t("great"); say.className = "meter-say good"; }
     }
     if (current && current.phase === "holding") holdAuto(v);
+    if (current && current.cv && measuring() && !coachTalking()) {
+      if (v > 0.15) { current.cv.voiced++; if (v >= tgt) current.cv.loud++; }
+    }
+  }
+
+  // ---------- on-device coach ----------
+  // Spoken tips from the loudness meter. Everything is measured and decided on this phone;
+  // nothing is recorded or sent anywhere. It only comments on loudness during practice.
+  const COACH = {
+    great: ["Great, nice and loud!", "Strong voice. Well done.", "That was loud the whole way. Lovely.", "Excellent. Keep that voice."],
+    ok: ["Good. Keep it loud right to the end.", "Nice. Push from the belly to the finish.", "Good work. Stay strong all the way through."],
+    low: ["A bit louder next time, from the belly.", "Take a big breath first, then go louder.", "Think loud, like calling across the room."]
+  };
+  const coachOn = () => S.coach !== false && mic.state === "on";
+  const coachTalking = () => { try { return speechSynthesis.speaking; } catch (e) { return false; } };
+  const measuring = () => (current.phase === "holding") || (current.phase === "counting") || (current.phase === "ready" && current.ex.type === "prompt");
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  // Returns a tip for the round just finished, or null if there was too little voice to judge.
+  function coachTip() {
+    if (!coachOn() || !current || !current.cv || current.cv.voiced < 15) return null;
+    const r = current.cv.loud / current.cv.voiced;
+    return r >= 0.75 ? { text: pick(COACH.great), cls: "good" } : r >= 0.4 ? { text: pick(COACH.ok), cls: "good" } : { text: pick(COACH.low), cls: "warn" };
+  }
+  function coachAfterPrompt() {
+    const tip = coachTip();
+    if (!tip) return;
+    if (tip.cls === "warn") {
+      current.goodRun = 0;
+      // Never nag twice in a row.
+      if (current.lastLowCue !== current.i - 1) { current.lastLowCue = current.i; speak("A little louder on the next one."); }
+      return;
+    }
+    current.goodRun = (current.goodRun || 0) + 1;
+    if (current.goodRun % 3 === 0) speak(pick(COACH.great));
   }
 
   function rep() {
     const { ex, i } = current;
     current.phase = "ready";
+    current.cv = { voiced: 0, loud: 0 };
     let body = "";
     if (ex.type === "hold") body = `<div class="timer" id="clock">0.0<small>s</small></div>
         <button class="btn btn-teal btn-big" id="act">${t("holdBtn")}</button>`;
@@ -987,7 +1025,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     const act = app.querySelector("#act");
     if (ex.type === "hold") act.onclick = () => current.phase === "holding" ? endHold() : startHold(act);
     else if (ex.type === "timed") act.onclick = () => startCountdown(act);
-    else act.onclick = nextRep;
+    else act.onclick = () => { coachAfterPrompt(); nextRep(); };
   }
 
   function startHold(btn) {
@@ -1027,9 +1065,12 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
 
   function rest(big, msg, unit) {
     const last = current.i + 1 >= current.total;
+    const tip = coachTip();
+    if (tip) speak(tip.text);
     app.querySelector(".card").innerHTML = `
       <div class="timer">${esc(big)}${unit ? `<small>${unit}</small>` : ""}</div>
       <p class="meter-say good">${esc(msg)}</p>
+      ${tip ? `<p class="coach ${tip.cls}" aria-live="polite">🎙️ ${esc(tip.text)}</p>` : ""}
       <p class="muted" style="text-align:center">${last ? t("lastOne") : t("rest")}</p>
       <button class="btn btn-teal btn-big" id="act">${last ? t("finish") : t("nextOne")}</button>`;
     app.querySelector("#act").onclick = nextRep;
@@ -1068,6 +1109,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       <div class="top"><button class="icon-btn" id="back">${t("home")}</button><h1>${t("settings")}</h1></div>
       <div class="card">
         <label for="s-name">${t("nameLabel")}<input id="s-name" value="${esc(S.name)}"></label>
+        <label class="check-row" for="s-coach"><input type="checkbox" id="s-coach"> Spoken coach tips during voice practice (uses the loudness meter on this phone only)</label>
         <label class="check-row" for="s-seated"><input type="checkbox" id="s-seated"> Seated exercise routine (Move)</label>
         <button class="btn btn-ghost" id="s-recheck">Redo the exercise safety check</button>
         <label for="s-cond">${esc(condText().label)}
@@ -1118,6 +1160,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     app.querySelector("#s-script").value = S.script;
     app.querySelector("#s-cond").value = S.condition;
     app.querySelector("#s-seated").checked = !!S.seated;
+    app.querySelector("#s-coach").checked = S.coach !== false;
     app.querySelector("#s-recheck").onclick = () => { S.tab = "move"; moveCheck(); };
     app.querySelector("#s-phrases").value = S.phraseMode;
     app.querySelector("#back").onclick = home;
@@ -1128,6 +1171,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       S.practice = sp.value; S.withEnglish = se.checked;
       S.script = app.querySelector("#s-script").value;
       S.condition = app.querySelector("#s-cond").value; buildPlan();
+      S.coach = app.querySelector("#s-coach").checked;
       const wantSeated = app.querySelector("#s-seated").checked;
       S.seated = wantSeated || !!(S.moveCheck && S.moveCheck.answers[3]);
       S.phraseMode = app.querySelector("#s-phrases").value;
