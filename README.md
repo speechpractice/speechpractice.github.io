@@ -21,6 +21,8 @@ The app has two sections, switched with tabs at the top.
   knee straightening, side steps, supported balance, punches, a steady walk, stretches and
   calm breathing. Each one has a **seated** version and a **standing** version done holding a
   sturdy chair or counter.
+- **Animated demos.** Each exercise shows a looping stick-figure animation of the movement,
+  matched to the seated or standing version. It holds still when the device asks for reduced motion.
 - **Safety check first.** Four yes/no questions. A "yes" about medical supervision, chest pain
   or faintness, or a recent stroke, heart problem, surgery or injury locks the section until
   the person confirms their doctor has said gentle home exercise is okay. A "yes" about falls

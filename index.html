@@ -140,6 +140,7 @@ textarea { min-height: 200px; resize: vertical; }
 select { font-size: .9rem; text-overflow: ellipsis; }
 .safety { border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: .85rem; color: var(--muted); display: flex; flex-direction: column; gap: 8px; }
 .safety b { color: var(--ink); }
+.anim { width: 100%; max-width: 280px; height: auto; align-self: center; background: var(--bg); border-radius: 16px; }
 .strip { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
 .chip { flex: none; font-size: .72rem; font-family: var(--display); font-weight: 600; padding: 6px 10px; border-radius: 999px; background: var(--meter-bg); color: var(--muted); white-space: nowrap; }
 .chip.done { background: var(--good); color: var(--surface); }
@@ -823,6 +824,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       ${moveStrip()}
       <div class="card">
         <h1>${m.name}</h1>
+        <svg class="anim" id="mv-anim" viewBox="0 0 200 200" role="img" aria-label="${esc(m.name)}: animated example"></svg>
         <p style="font-size:1.15rem">${esc(how)}</p>
         <div class="timer" id="mv-clock">${m.type === "time" ? fmtSecs(m.secs) : m.reps + "<small> times</small>"}</div>
         ${m.type === "time" ? `<button class="btn btn-teal btn-big" id="mv-start">Start the timer</button>` : ""}
@@ -834,6 +836,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       <button class="btn btn-ghost" id="mv-skip">Skip this one</button>`;
     app.querySelector("#back").onclick = () => { mSession = null; home(); };
     centerStrip();
+    playAnim(app.querySelector("#mv-anim"), animFor(id));
     app.querySelector("#mv-hear").onclick = () => speak(m.name + ". " + how + " " + m.tip);
     const finish = (did) => {
       stopTimer();
@@ -889,6 +892,150 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       <button class="btn btn-ghost" id="mv-home">${t("backHome")}</button>`;
     speak("All movement done today. Wonderful work.");
     app.querySelector("#mv-home").onclick = home;
+  }
+  // ---------- exercise animations ----------
+  // A stick figure drawn with simple inverse kinematics: each pose gives the pelvis, torso lean
+  // and where the hands and ankles are; elbows and knees are worked out. Poses loop smoothly.
+  const G = 185; // ground line
+  const P = (pel, lean, hands, feet, extra) => Object.assign({ pel, lean, hands, feet, shrug: 0, toe: 0 }, extra || {});
+  // Standing side view: figure at x 104, holding the back of a chair in front.
+  const SH = [131, 106];               // hand on the chair back
+  const ST = (lean, free, feet, extra) => P([104, 117], lean, [SH, free], feet, extra);
+  const FEET = [[100, 183], [108, 183]];
+  // Seated side view on a chair facing right.
+  const SP = [80, 147];
+  const SF = [[110, 183], [116, 183]];
+  const SEAT = (hands, feet, extra) => P(SP, 4, hands, feet, extra);
+  // Front views.
+  const FP = [100, 117], FFEET = [[92, 183], [108, 183]], FSIDES = [[84, 120], [116, 120]], BAR = [[85, 112], [115, 112]];
+  const FSP = [100, 147], FSFEET = [[90, 183], [110, 183]], FSLAP = [[90, 150], [110, 150]];
+  const ANIM = {
+    march: {
+      stand: { view: "side", prop: "chairF", dur: 700, poses: [ST(0, [118, 92], [[100, 183], [114, 150]]), ST(0, [86, 112], [[112, 152], [108, 183]])] },
+      seat: { view: "side", prop: "seat", dur: 700, poses: [SEAT([[100, 118], [70, 128]], [[110, 183], [118, 162]]), SEAT([[70, 128], [100, 118]], [[112, 164], [116, 183]])] }
+    },
+    shoulders: {
+      stand: { view: "front", prop: "none", dur: 900, poses: [P(FP, 0, FSIDES, FFEET), P(FP, 0, [[84, 112], [116, 112]], FFEET, { shrug: 7 }), P(FP, 0, FSIDES, FFEET, { shrug: -2 })] },
+      seat: { view: "front", prop: "seatF", dur: 900, poses: [P(FSP, 0, FSLAP, FSFEET), P(FSP, 0, [[88, 142], [112, 142]], FSFEET, { shrug: 7 }), P(FSP, 0, FSLAP, FSFEET, { shrug: -2 })] }
+    },
+    reach: {
+      stand: { view: "front", prop: "chairS", dur: 1300, poses: [P(FP, 0, [[84, 120], [132, 108]], FFEET), P(FP, 0, [[80, 16], [132, 108]], FFEET), P(FP, 0, [[42, 64], [132, 108]], FFEET)] },
+      seat: { view: "front", prop: "seatF", dur: 1300, poses: [P(FSP, 0, FSLAP, FSFEET), P(FSP, 0, [[82, 46], [118, 46]], FSFEET), P(FSP, 0, [[44, 96], [156, 96]], FSFEET)] }
+    },
+    sitstand: {
+      stand: { view: "side", prop: "seat", dur: 1400, poses: [P(SP, 4, [[100, 140], [104, 142]], SF), P([86, 145], 38, [[112, 150], [116, 152]], SF), P([98, 118], 4, [[96, 120], [100, 121]], SF)] },
+      seat: { view: "side", prop: "seat", dur: 1000, poses: [SEAT([[100, 140], [104, 142]], SF), SEAT([[100, 138], [104, 140]], [[111, 184], [117, 184]], { pel: [80, 145], lean: 12 })] }
+    },
+    heels: {
+      stand: { view: "side", prop: "chairF", dur: 1100, poses: [ST(0, [129, 108], FEET), P([104, 109], 0, [SH, [129, 108]], [[100, 175], [108, 175]], { toe: -1 })] },
+      seat: { view: "side", prop: "seat", dur: 1000, poses: [SEAT([[100, 140], [104, 142]], SF), SEAT([[100, 140], [104, 142]], [[110, 176], [116, 176]], { toe: -1 }), SEAT([[100, 140], [104, 142]], SF, { toe: 1 })] }
+    },
+    knee: {
+      stand: null,
+      seat: { view: "side", prop: "seat", dur: 1500, poses: [SEAT([[78, 152], [82, 152]], SF), SEAT([[78, 152], [82, 152]], [[110, 183], [146, 150]])] }
+    },
+    sidestep: {
+      stand: { view: "front", prop: "bar", dur: 900, poses: [P([90, 117], 0, [[78, 112], [104, 112]], [[82, 183], [98, 183]]), P([96, 117], 0, [[84, 112], [110, 112]], [[82, 183], [116, 178]]), P([110, 117], 0, [[98, 112], [124, 112]], [[102, 183], [118, 183]]), P([104, 117], 0, [[92, 112], [118, 112]], [[86, 178], [118, 183]])] },
+      seat: { view: "front", prop: "seatF", dur: 900, poses: [P(FSP, 0, FSLAP, FSFEET), P(FSP, 0, FSLAP, [[74, 183], [110, 183]]), P(FSP, 0, FSLAP, FSFEET), P(FSP, 0, FSLAP, [[90, 183], [126, 183]])] }
+    },
+    balance: {
+      stand: { view: "front", prop: "bar", dur: 1600, poses: [P([97, 117], -3, BAR, [[95, 183], [103, 183]]), P([103, 117], 3, BAR, [[97, 183], [105, 183]])] },
+      seat: { view: "front", prop: "seatF", dur: 1500, poses: [P(FSP, 0, FSLAP, FSFEET), P(FSP, -12, [[84, 150], [104, 150]], FSFEET), P(FSP, 0, FSLAP, FSFEET), P(FSP, 12, [[96, 150], [116, 150]], FSFEET)] }
+    },
+    punches: {
+      stand: { view: "side", prop: "chairF", dur: 550, poses: [ST(0, [118, 76], FEET), ST(4, [150, 66], FEET)] },
+      seat: { view: "side", prop: "seat", dur: 550, poses: [SEAT([[128, 98], [98, 104]], SF), SEAT([[98, 104], [128, 98]], SF)] }
+    },
+    walk: {
+      stand: { view: "side", prop: "none", dur: 650, poses: [P([100, 118], 3, [[116, 106], [86, 112]], [[116, 183], [86, 179]]), P([100, 116], 3, [[100, 118], [100, 118]], [[100, 183], [104, 168]]), P([100, 118], 3, [[86, 112], [116, 106]], [[86, 179], [116, 183]]), P([100, 116], 3, [[100, 118], [100, 118]], [[104, 168], [100, 183]])] },
+      seat: { view: "side", prop: "seat", dur: 450, poses: [SEAT([[100, 116], [70, 126]], [[110, 183], [118, 162]]), SEAT([[70, 126], [100, 116]], [[112, 164], [116, 183]])] }
+    },
+    stretch: {
+      stand: { view: "side", prop: "wall", dur: 2200, poses: [P([108, 119], 14, [[160, 78], [160, 82]], [[132, 183], [78, 183]]), P([112, 121], 20, [[160, 78], [160, 82]], [[132, 183], [78, 183]])] },
+      seat: { view: "side", prop: "seat", dur: 2200, poses: [SEAT([[104, 142], [108, 144]], [[110, 183], [150, 180]], { lean: 8 }), SEAT([[130, 160], [134, 162]], [[110, 183], [150, 180]], { lean: 30 })] }
+    },
+    breathe: {
+      stand: null,
+      seat: { view: "front", prop: "seatF", dur: 3000, breath: true, poses: [P(FSP, 0, FSLAP, FSFEET), P(FSP, 0, [[88, 147], [112, 147]], FSFEET, { shrug: 4 })] }
+    }
+  };
+  const animFor = (id) => { const a = ANIM[id]; if (!a) return null; return (S.seated ? a.seat : a.stand) || a.seat || a.stand; };
+
+  function ik(a, t, l1, l2, bend) {
+    let dx = t[0] - a[0], dy = t[1] - a[1], d = Math.hypot(dx, dy);
+    d = Math.min(Math.max(d, Math.abs(l1 - l2) + 0.01), l1 + l2 - 0.01);
+    const base = Math.atan2(dy, dx), k = Math.acos((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d));
+    const j = [a[0] + l1 * Math.cos(base + bend * k), a[1] + l1 * Math.sin(base + bend * k)];
+    const end = [a[0] + d * Math.cos(base), a[1] + d * Math.sin(base)];
+    return [j, end];
+  }
+  const lerp = (x, y, f) => x + (y - x) * f;
+  function mix(p, q, f) {
+    const m = (u, v) => [lerp(u[0], v[0], f), lerp(u[1], v[1], f)];
+    return { pel: m(p.pel, q.pel), lean: lerp(p.lean, q.lean, f), hands: [m(p.hands[0], q.hands[0]), m(p.hands[1], q.hands[1])],
+      feet: [m(p.feet[0], q.feet[0]), m(p.feet[1], q.feet[1])], shrug: lerp(p.shrug, q.shrug, f), toe: lerp(p.toe, q.toe, f) };
+  }
+  function propSVG(kind) {
+    const c = 'stroke="var(--muted)" stroke-width="4" stroke-linecap="round" fill="none"';
+    if (kind === "chairF") return `<path ${c} d="M131 104 V183 M131 151 H161 V183"/>`;
+    if (kind === "seat") return `<path ${c} d="M68 98 V183 M68 151 H110 V183"/>`;
+    if (kind === "chairS") return `<path ${c} d="M134 104 V183 M134 151 H160 V183"/>`;
+    if (kind === "seatF") return `<rect x="76" y="100" width="48" height="52" rx="4" fill="var(--meter-bg)"/><path ${c} d="M74 152 H126 M78 152 V183 M122 152 V183"/>`;
+    if (kind === "bar") return `<path ${c} d="M52 112 H148 M56 112 V183 M144 112 V183"/>`;
+    if (kind === "wall") return `<path stroke="var(--muted)" stroke-width="6" d="M163 30 V185"/>`;
+    return "";
+  }
+  function figureSVG(spec, p) {
+    const front = spec.view === "front";
+    const lean = p.lean * Math.PI / 180;
+    const pel = p.pel, neck = [pel[0] + 50 * Math.sin(lean), pel[1] - 50 * Math.cos(lean) - p.shrug * 0.3];
+    const head = [neck[0] + 14 * Math.sin(lean), neck[1] - 14 * Math.cos(lean)];
+    const sh = front ? [[neck[0] - 12, neck[1] + 4 - p.shrug], [neck[0] + 12, neck[1] + 4 - p.shrug]] : [[neck[0], neck[1] + 4 - p.shrug], [neck[0], neck[1] + 4 - p.shrug]];
+    const hp = front ? [[pel[0] - 8, pel[1]], [pel[0] + 8, pel[1]]] : [pel, pel];
+    const limbs = [];
+    for (let i = 0; i < 2; i++) {
+      const armBend = front ? (i === 0 ? 1 : -1) : 1, legBend = front ? (i === 0 ? 1 : -1) : -1;
+      const [el, hand] = ik(sh[i], p.hands[i], 26, 24, armBend);
+      // Sitting, seen from the front, the thighs point at the viewer and look short.
+      const thigh = spec.prop === "seatF" ? 10 : 34;
+      const [kn, ank] = ik(hp[i], p.feet[i], thigh, 34, legBend);
+      let toe;
+      if (front) toe = [ank[0] + (i === 0 ? -6 : 6), ank[1] + 2];
+      else if (p.toe < -0.3) toe = [ank[0] + 9, Math.min(G, ank[1] + 8)];
+      else if (p.toe > 0.3) toe = [ank[0] + 10, ank[1] - 5];
+      else toe = [ank[0] + 11, ank[1] + 1];
+      limbs.push({ el, hand, kn, ank, toe, far: !front && i === 1 });
+    }
+    const line = (pts, op) => `<polyline points="${pts.map((q) => q[0].toFixed(1) + "," + q[1].toFixed(1)).join(" ")}" fill="none" stroke="var(--teal)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="${op}"/>`;
+    let out = `<line x1="20" y1="${G + 1}" x2="180" y2="${G + 1}" stroke="var(--line)" stroke-width="3" stroke-linecap="round"/>` + propSVG(spec.prop);
+    const order = front ? [0, 1] : [1, 0];
+    order.forEach((i) => { const L = limbs[i]; if (L.far) { out += line([hp[i], L.kn, L.ank, L.toe], 0.45) + line([sh[i], L.el, L.hand], 0.45); } });
+    out += line([pel, neck], 1);
+    if (front) out += line([sh[0], sh[1]], 1) + line([hp[0], hp[1]], 1);
+    order.forEach((i) => { const L = limbs[i]; if (!L.far) out += line([hp[i], L.kn, L.ank, L.toe], 1) + line([sh[i], L.el, L.hand], 1); });
+    out += `<circle cx="${head[0].toFixed(1)}" cy="${head[1].toFixed(1)}" r="11" fill="var(--surface)" stroke="var(--teal)" stroke-width="6"/>`;
+    return out;
+  }
+  let animRaf = 0;
+  function playAnim(el, spec) {
+    cancelAnimationFrame(animRaf);
+    if (!el || !spec) return;
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const n = spec.poses.length, t0 = performance.now();
+    const draw = (now) => {
+      if (!el.isConnected) return;
+      const tt = reduce ? 0 : Math.max(0, now - t0) / spec.dur; // a frame can be stamped just before t0
+      const seg = Math.floor(tt) % n, f = (1 - Math.cos((tt % 1) * Math.PI)) / 2;
+      const p = n === 1 ? spec.poses[0] : mix(spec.poses[seg], spec.poses[(seg + 1) % n], f);
+      let svg = figureSVG(spec, p);
+      if (spec.breath) {
+        const k = (1 - Math.cos((Math.max(0, now - t0) / 10000) * Math.PI * 2)) / 2; // 4 in, 6 out is close to a 10 s cycle
+        svg += `<circle cx="160" cy="60" r="${(10 + 14 * k).toFixed(1)}" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="2"/><text x="160" y="96" text-anchor="middle" font-size="11" fill="var(--muted)">${k > 0.5 ? "breathe in" : "breathe out"}</text>`;
+      }
+      el.innerHTML = svg;
+      if (!reduce) animRaf = requestAnimationFrame(draw);
+    };
+    draw(performance.now());
   }
   const fmtSecs = (n) => n >= 60 ? `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}` : `${n}<small>s</small>`;
 
