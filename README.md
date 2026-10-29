@@ -14,6 +14,9 @@ The app has two sections, switched with tabs at the top.
 
 ### 🏃 Move
 
+- **Circuit format.** A warm-up, then the main exercises in a circuit, twice (once in the
+  short-session style), then a cool-down, moving on with one tap. Each finished exercise gets a ✓.
+
 - A short daily routine of gentle exercises: marching, wide reaches, sit to stand, heel raises,
   knee straightening, side steps, supported balance, punches, a steady walk, stretches and
   calm breathing. Each one has a **seated** version and a **standing** version done holding a
@@ -28,6 +31,13 @@ The app has two sections, switched with tabs at the top.
   older adults.
 
 ### 🗣️ Speak
+
+- **One tap from exercise to exercise.** The held-voice exercises (long, high and low "Ahh")
+  rotate as a circuit, one round each: 1, 2, 3, 1, 2, 3 … until all rounds are done (5, or 3 in the
+  short-session style). Counting, Pa-Ta-Ka, phrases and reading then follow once each. Rotating
+  practice tends to help older adults retain skills, while the fixed daily order keeps it simple.
+- A checklist strip on every exercise screen shows ✓ for finished exercises and round progress
+  (for example 2/5). Leaving mid-session and coming back continues where you stopped.
 
 - **Spoken coach tips.** After each round, a short spoken tip based on how much of the round
   reached the loudness target (for example "Great, nice and loud!" or "Take a big breath first,

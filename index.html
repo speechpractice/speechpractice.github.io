@@ -140,6 +140,10 @@ textarea { min-height: 200px; resize: vertical; }
 select { font-size: .9rem; text-overflow: ellipsis; }
 .safety { border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: .85rem; color: var(--muted); display: flex; flex-direction: column; gap: 8px; }
 .safety b { color: var(--ink); }
+.strip { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.chip { flex: none; font-size: .72rem; font-family: var(--display); font-weight: 600; padding: 6px 10px; border-radius: 999px; background: var(--meter-bg); color: var(--muted); white-space: nowrap; }
+.chip.done { background: var(--good); color: var(--surface); }
+.chip.now { outline: 2px solid var(--marigold); color: var(--ink); }
 .coach { text-align: center; font-family: var(--display); font-weight: 600; font-size: 1.1rem; background: var(--teal-soft); border-radius: 12px; padding: 10px 14px; }
 .coach.warn { color: var(--warn); }
 .coach.good { color: var(--good); }
@@ -479,19 +483,35 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
   // ---------- microphone ----------
   const TARGETS = { easier: 0.45, normal: 0.6, harder: 0.72 };
   const mic = { state: "off", level: 0 };
+  // iPhone and iPad Safari only run audio that was started by a tap, and pause it when the page
+  // is hidden or speech plays. So: create and resume the audio context inside the tap, keep the
+  // graph connected to the output (muted), read bytes (works in every browser), and resume often.
+  function micUp() {
+    try { if (mic.ctx && mic.ctx.state !== "running") mic.ctx.resume(); } catch (e) {}
+    startMic();
+  }
   async function startMic() {
     if (mic.state === "on" || mic.state === "asking") return;
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { mic.state = "none"; return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !AC) { mic.state = "none"; return; }
+    if (!mic.ctx) { try { mic.ctx = new AC(); } catch (e) { mic.state = "none"; return; } }
+    try { mic.ctx.resume(); } catch (e) {}
     mic.state = "asking";
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const an = ctx.createAnalyser(); an.fftSize = 1024; ctx.createMediaStreamSource(stream).connect(an);
-      const buf = new Float32Array(an.fftSize);
+      let stream;
+      try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }); }
+      catch (e) { if (e && e.name === "NotAllowedError") throw e; stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+      const ctx = mic.ctx;
+      const src = ctx.createMediaStreamSource(stream);
+      const an = ctx.createAnalyser(); an.fftSize = 1024;
+      const mute = ctx.createGain(); mute.gain.value = 0;
+      src.connect(an); an.connect(mute); mute.connect(ctx.destination);
+      if (ctx.state !== "running") { try { await ctx.resume(); } catch (e) {} }
+      const buf = new Uint8Array(an.fftSize);
       mic.state = "on";
       const tick = () => {
-        an.getFloatTimeDomainData(buf);
-        let sum = 0; for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+        an.getByteTimeDomainData(buf);
+        let sum = 0; for (let i = 0; i < buf.length; i++) { const x = (buf[i] - 128) / 128; sum += x * x; }
         const db = 20 * Math.log10(Math.sqrt(sum / buf.length) + 1e-8); // dBFS, about -90..0
         mic.level = mic.level * 0.6 + Math.min(1, Math.max(0, (db + 60) / 55)) * 0.4;
         onLevel(mic.level);
@@ -501,10 +521,15 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     } catch (e) { mic.state = "denied"; }
     if (current) renderMeterBox();
   }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && mic.ctx) { try { mic.ctx.resume(); } catch (e) {} } });
 
   // ---------- speech (read instructions aloud) ----------
   function speak(text) {
-    try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "en-US"; u.rate = 0.9; speechSynthesis.speak(u); } catch (e) {}
+    try {
+      speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "en-US"; u.rate = 0.9;
+      u.onend = () => { try { if (mic.ctx) mic.ctx.resume(); } catch (e) {} };
+      speechSynthesis.speak(u);
+    } catch (e) {}
   }
 
   // ---------- keep screen awake ----------
@@ -530,12 +555,12 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       <div class="card">
         <div><h2>${doneCount === EX.length ? t("allDoneToday") : t("today")}</h2>
         <p class="muted">${t("doneOf", { d: doneCount, n: EX.length, m: (PLANS[S.condition] || PLANS.pd).minutes })}</p></div>
-        ${next ? `<button class="btn btn-primary btn-big pulse" id="go">${doneCount ? t("cont") : t("start")}: ${exT(next.id).name}</button>`
+        ${next ? `<button class="btn btn-primary btn-big pulse" id="go">${doneCount || Object.keys(tdy.prog || {}).length ? t("cont") : t("start")}: ${exT(next.id).name}</button>`
                : `<button class="btn btn-ghost" id="again">${t("again")}</button>`}
         <ul class="ex-list">
           ${EX.map((e) => `<li><button class="ex-item ${tdy.done[e.id] ? "done" : ""}" data-ex="${e.id}">
             <span class="chk" aria-hidden="true">${tdy.done[e.id] ? "✓" : ""}</span>
-            <span class="t"><b>${exT(e.id).name}</b><small>${exT(e.id).short}</small></span></button></li>`).join("")}
+            <span class="t"><b>${exT(e.id).name}</b><small>${exT(e.id).short}${!tdy.done[e.id] && tdy.prog && tdy.prog[e.id] ? ` · ${tdy.prog[e.id]}/${repsFor(e)} rounds` : ""}</small></span></button></li>`).join("")}
         </ul>
       </div>
 
@@ -562,9 +587,9 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     app.querySelector("#about").onclick = () => { settings(); const a = document.getElementById("about-card"); if (a) a.scrollIntoView(); };
     app.querySelector("#share").onclick = share;
     wireTabs();
-    const go = app.querySelector("#go"); if (go) go.onclick = () => intro(next);
-    const again = app.querySelector("#again"); if (again) again.onclick = () => intro(EX[0]);
-    app.querySelectorAll("[data-ex]").forEach((b) => b.onclick = () => intro(EX.find((e) => e.id === b.dataset.ex)));
+    const go = app.querySelector("#go"); if (go) go.onclick = () => startSession();
+    const again = app.querySelector("#again"); if (again) again.onclick = () => startSession(null, true);
+    app.querySelectorAll("[data-ex]").forEach((b) => b.onclick = () => startSession(b.dataset.ex));
   }
 
 
@@ -631,7 +656,45 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
   };
   const movePlan = () => MOVE_PLANS[S.condition] || MOVE_PLANS.pd;
   const moveSecs = (m) => m.type === "time" ? m.secs : m.reps * 4;
-  const moveMinutes = () => Math.max(5, Math.round((movePlan().steps.reduce((a, id) => a + moveSecs(MOVES[id]) + 20, 0)) / 60));
+  // Warm-up once, the main exercises as a circuit (2 rounds; 1 for short sessions), cool-down once.
+  // A circuit rests each muscle group while another works, and is at least as effective as
+  // finishing all sets of one exercise before the next.
+  const COOL = ["stretch", "breathe"];
+  const moveRounds = () => S.condition === "ms" ? 1 : 2;
+  function moveSteps() {
+    const ids = movePlan().steps;
+    const warm = ids.slice(0, 1), cool = ids.filter((id) => COOL.includes(id)), main = ids.slice(1).filter((id) => !COOL.includes(id));
+    const R = moveRounds(), steps = warm.map((id) => ({ id, r: 0, of: 1 }));
+    for (let r = 0; r < R; r++) main.forEach((id) => steps.push({ id, r, of: R }));
+    cool.forEach((id) => steps.push({ id, r: 0, of: 1 }));
+    return steps;
+  }
+  const moveMinutes = () => Math.max(5, Math.round(moveSteps().reduce((a, st) => a + moveSecs(MOVES[st.id]) + 20, 0) / 60));
+  const moveProg = () => { const tdy = today(); tdy.moveProg = tdy.moveProg || {}; return tdy.moveProg; };
+  const moveStepDone = (st) => moved()[st.id] || (moveProg()[st.id] || 0) > st.r;
+  let mSession = null;
+  function startMove(fromId, redo) {
+    if (redo) { const tdy = today(); tdy.moved = {}; tdy.moveProg = {}; save(); }
+    const steps = moveSteps();
+    let k = fromId ? steps.findIndex((st) => st.id === fromId && !moveStepDone(st)) : steps.findIndex((st) => !moveStepDone(st));
+    if (fromId && k < 0) { delete moved()[fromId]; moveProg()[fromId] = 0; save(); k = steps.findIndex((st) => st.id === fromId); }
+    if (k < 0) { mSession = null; return moveHome(); }
+    mSession = { steps, k }; wake();
+    moveRun();
+  }
+  function moveNextLabel() {
+    let k = mSession.k + 1;
+    while (k < mSession.steps.length && moveStepDone(mSession.steps[k])) k++;
+    const st = mSession.steps[k];
+    return st ? `${MOVES[st.id].name}${st.of > 1 ? ` · round ${st.r + 1} of ${st.of}` : ""}` : "";
+  }
+  function moveStrip() {
+    const done = moved(), p = moveProg(), cur = mSession && mSession.steps[mSession.k] && mSession.steps[mSession.k].id;
+    return `<div class="strip" aria-label="Today's movement">${movePlan().steps.map((id) => {
+      const of = COOL.includes(id) || id === movePlan().steps[0] ? 1 : moveRounds();
+      return `<span class="chip ${done[id] ? "done" : ""} ${id === cur ? "now" : ""}">${done[id] ? "✓ " : ""}${esc(MOVES[id].name)}${!done[id] && of > 1 && p[id] ? ` ${p[id]}/${of}` : ""}</span>`;
+    }).join("")}</div>`;
+  }
   const moved = () => { const tdy = today(); tdy.moved = tdy.moved || {}; return tdy.moved; };
   function moveWeek() { let n = 0; const d = new Date(); for (let i = 0; i < 7; i++) { const h = S.history[dayKey(d)]; if (h && h.moved && Object.keys(h.moved).length) n++; d.setDate(d.getDate() - 1); } return n; }
 
@@ -682,13 +745,13 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         <button class="btn btn-ghost" id="mv-redo">Answer the questions again</button>
       </div>` : `<div class="card">
         <div><h2>${doneCount === plan.steps.length ? "All movement done today. Well done!" : "Today's movement"}</h2>
-        <p class="muted">${doneCount} of ${plan.steps.length} done · about ${moveMinutes()} minutes · ${S.seated ? "seated routine" : "standing with support"}</p></div>
-        ${next ? `<button class="btn btn-primary btn-big pulse" id="mv-go">${doneCount ? t("cont") : t("start")}: ${MOVES[next].name}</button>`
+        <p class="muted">${doneCount} of ${plan.steps.length} done · about ${moveMinutes()} minutes · ${S.seated ? "seated routine" : "standing with support"}${moveRounds() > 1 ? " · main exercises twice, as a circuit" : ""}</p></div>
+        ${next ? `<button class="btn btn-primary btn-big pulse" id="mv-go">${doneCount || Object.keys(moveProg()).length ? t("cont") : t("start")}: ${MOVES[next].name}</button>`
                : `<button class="btn btn-ghost" id="mv-again">Do the routine again</button>`}
         <ul class="ex-list">
           ${plan.steps.map((id) => `<li><button class="ex-item ${done[id] ? "done" : ""}" data-mv="${id}">
             <span class="chk" aria-hidden="true">${done[id] ? "✓" : ""}</span>
-            <span class="t"><b>${MOVES[id].name}</b><small>${MOVES[id].short}</small></span></button></li>`).join("")}
+            <span class="t"><b>${MOVES[id].name}</b><small>${MOVES[id].short}${!done[id] && moveProg()[id] ? ` · ${moveProg()[id]}/${moveRounds()} rounds` : ""}</small></span></button></li>`).join("")}
         </ul>
         <button class="btn btn-ghost" id="mv-mode">${S.seated ? "Seated routine is on" : "Switch to the seated routine"}</button>
       </div>
@@ -713,13 +776,13 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       app.querySelector("#mv-redo").onclick = moveCheck;
       return;
     }
-    const g = app.querySelector("#mv-go"); if (g) g.onclick = () => moveRun(next, true);
-    const a = app.querySelector("#mv-again"); if (a) a.onclick = () => moveRun(plan.steps[0], true);
+    const g = app.querySelector("#mv-go"); if (g) g.onclick = () => startMove();
+    const a = app.querySelector("#mv-again"); if (a) a.onclick = () => startMove(null, true);
     app.querySelector("#mv-mode").onclick = () => {
       if (S.seated && S.moveCheck.answers[3]) { moveCheck(); return; }
       S.seated = !S.seated; save(); moveHome();
     };
-    app.querySelectorAll("[data-mv]").forEach((b) => b.onclick = () => moveRun(b.dataset.mv, false));
+    app.querySelectorAll("[data-mv]").forEach((b) => b.onclick = () => startMove(b.dataset.mv));
   }
 
   function moveCheck() {
@@ -749,13 +812,15 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     };
   }
 
-  function moveRun(id, chain) {
+  function moveRun() {
     stopTimer();
-    const m = MOVES[id], plan = movePlan();
+    const st = mSession.steps[mSession.k];
+    if (!st) { mSession = null; return moveHome(); }
+    const id = st.id, m = MOVES[id];
     const how = S.seated ? m.seat : m.stand;
-    const idx = plan.steps.indexOf(id);
     app.innerHTML = `
-      <div class="top"><button class="icon-btn" id="back">${t("home")}</button><span class="eyebrow">${idx + 1} of ${plan.steps.length} · ${S.seated ? "Seated" : "Standing with support"}</span></div>
+      <div class="top"><button class="icon-btn" id="back">${t("home")}</button><span class="eyebrow">${st.of > 1 ? `Round ${st.r + 1} of ${st.of} · ` : ""}${S.seated ? "Seated" : "Standing with support"}</span></div>
+      ${moveStrip()}
       <div class="card">
         <h1>${m.name}</h1>
         <p style="font-size:1.15rem">${esc(how)}</p>
@@ -767,43 +832,63 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         <p class="note" style="text-align:center">Stop if anything hurts or you feel dizzy or short of breath.</p>
       </div>
       <button class="btn btn-ghost" id="mv-skip">Skip this one</button>`;
-    app.querySelector("#back").onclick = home;
+    app.querySelector("#back").onclick = () => { mSession = null; home(); };
+    centerStrip();
     app.querySelector("#mv-hear").onclick = () => speak(m.name + ". " + how + " " + m.tip);
     const finish = (did) => {
       stopTimer();
-      if (did) { moved()[id] = true; save(); }
-      const nextId = plan.steps.slice(idx + 1).find((x) => !moved()[x]);
-      if (chain && nextId) return moveRest(nextId);
-      if (plan.steps.every((x) => moved()[x])) track("move-all-done");
+      if (did) {
+        const p = moveProg(); p[id] = Math.max(p[id] || 0, st.r + 1);
+        if (p[id] >= st.of) moved()[id] = true;
+        save();
+      }
+      const label = moveNextLabel();
+      do { mSession.k++; } while (mSession.k < mSession.steps.length && moveStepDone(mSession.steps[mSession.k]));
+      if (mSession.k < mSession.steps.length) return moveRest(label);
+      mSession = null;
+      if (movePlan().steps.every((x) => moved()[x])) { track("move-all-done"); return moveDoneScreen(); }
       moveHome();
     };
     app.querySelector("#mv-done").onclick = () => finish(true);
     app.querySelector("#mv-skip").onclick = () => finish(false);
-    const st = app.querySelector("#mv-start");
-    if (st) st.onclick = () => {
-      st.disabled = true; wake();
+    const stb = app.querySelector("#mv-start");
+    if (stb) stb.onclick = () => {
+      stb.disabled = true; wake();
       const clock = app.querySelector("#mv-clock"), end = performance.now() + m.secs * 1000;
       timerId = setInterval(() => {
         const left = Math.max(0, (end - performance.now()) / 1000);
         clock.innerHTML = fmtSecs(Math.ceil(left));
-        if (left <= 0) { stopTimer(); clock.innerHTML = "✓"; st.textContent = "Time's up. Tap Done."; }
+        if (left <= 0) { stopTimer(); clock.innerHTML = "✓"; stb.textContent = "Time's up. Tap Done."; }
       }, 200);
     };
   }
-  function moveRest(nextId) {
+  function moveRest(label) {
     app.innerHTML = `
       <div class="top"><button class="icon-btn" id="back">${t("home")}</button></div>
+      ${moveStrip()}
       <div class="card" style="text-align:center">
         <div class="celebrate" aria-hidden="true">👏</div>
         <h2>Nice work. Rest and breathe.</h2>
         <p class="muted">Sip some water. Take as long as you need.</p>
-        <p>Next: <b>${MOVES[nextId].name}</b></p>
-        <button class="btn btn-primary btn-big" id="mv-next">I'm ready</button>
+        <button class="btn btn-primary btn-big" id="mv-next">Next: ${esc(label)}</button>
         <button class="btn btn-ghost" id="mv-stop">Stop for today</button>
       </div>`;
-    app.querySelector("#back").onclick = home;
-    app.querySelector("#mv-next").onclick = () => moveRun(nextId, true);
-    app.querySelector("#mv-stop").onclick = home;
+    app.querySelector("#back").onclick = () => { mSession = null; home(); };
+    centerStrip();
+    app.querySelector("#mv-next").onclick = moveRun;
+    app.querySelector("#mv-stop").onclick = () => { mSession = null; home(); };
+  }
+  function moveDoneScreen() {
+    app.innerHTML = `
+      ${moveStrip()}
+      <div class="card" style="text-align:center">
+        <div class="celebrate" aria-hidden="true">🌼</div>
+        <h1>All movement done today!</h1>
+        <p class="muted">${S.name ? esc(S.name) + ", w" : "W"}onderful work. Drink some water and rest.</p>
+      </div>
+      <button class="btn btn-ghost" id="mv-home">${t("backHome")}</button>`;
+    speak("All movement done today. Wonderful work.");
+    app.querySelector("#mv-home").onclick = home;
   }
   const fmtSecs = (n) => n >= 60 ? `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}` : `${n}<small>s</small>`;
 
@@ -910,24 +995,99 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     return s + `</svg>`;
   }
 
+  // ---------- Speak session ----------
+  // The held-voice exercises (long, high and low "Ahh") rotate as a circuit: 1,2,3, 1,2,3 ...
+  // Practising in small rotating groups helps skills stick for older adults, while keeping the
+  // order the same every day keeps it simple. Word and phrase exercises then run once each.
+  let session = null;
+  const prog = () => { const tdy = today(); tdy.prog = tdy.prog || {}; return tdy.prog; };
+  function sessionSteps() {
+    const firstHold = EX.findIndex((e) => e.type !== "prompt");
+    const lead = EX.filter((e, i) => e.type === "prompt" && i < firstHold);
+    const holds = EX.filter((e) => e.type !== "prompt");
+    const tail = EX.filter((e, i) => e.type === "prompt" && i > firstHold);
+    const steps = lead.map((e) => ({ id: e.id, r: 0, of: 1 }));
+    const R = Math.max(0, ...holds.map(repsFor));
+    for (let r = 0; r < R; r++) holds.forEach((e) => { if (r < repsFor(e)) steps.push({ id: e.id, r, of: repsFor(e) }); });
+    tail.forEach((e) => steps.push({ id: e.id, r: 0, of: 1 }));
+    return steps;
+  }
+  const stepDone = (st) => today().done[st.id] || (prog()[st.id] || 0) > st.r;
+  function startSession(fromId, redo) {
+    if (redo) { const tdy = today(); tdy.prog = {}; EX.forEach((e) => { delete tdy.done[e.id]; }); save(); }
+    const steps = sessionSteps();
+    let k = fromId ? steps.findIndex((st) => st.id === fromId && !stepDone(st)) : steps.findIndex((st) => !stepDone(st));
+    if (fromId && k < 0) { delete today().done[fromId]; prog()[fromId] = 0; save(); k = steps.findIndex((st) => st.id === fromId); }
+    if (k < 0) return finishSession();
+    session = { steps, k, seen: {} };
+    micUp(); wake(); runStep();
+  }
+  function runStep() {
+    stopTimer();
+    const st = session.steps[session.k];
+    if (!st) return finishSession();
+    const ex = EX.find((e) => e.id === st.id);
+    current = { ex, step: st, phase: "intro", i: st.r, total: st.of };
+    if (ex.type === "prompt") { current.items = ex.items().slice(0, ex.limit || undefined); current.i = 0; current.total = current.items.length; }
+    if (!session.seen[st.id] && (st.r === 0 || (prog()[st.id] || 0) === st.r)) intro(ex); else rep();
+  }
+  function completeStep() {
+    const st = session.steps[session.k];
+    const p = prog(); p[st.id] = Math.max(p[st.id] || 0, st.r + 1);
+    if (p[st.id] >= st.of) { today().done[st.id] = true; track("done-" + st.id); }
+    save();
+    do { session.k++; } while (session.k < session.steps.length && stepDone(session.steps[session.k]));
+    micUp();
+    if (session.k >= session.steps.length) return finishSession();
+    runStep();
+  }
+  function nextStepLabel() {
+    let k = session.k + 1;
+    while (k < session.steps.length && stepDone(session.steps[k])) k++;
+    const st = session.steps[k];
+    if (!st) return t("finish");
+    return `${t("next")}: ${exT(st.id).name}${st.of > 1 ? ` · round ${st.r + 1} of ${st.of}` : ""}`;
+  }
+  // Keep the current exercise visible in the checklist strip.
+  function centerStrip() {
+    const st = app.querySelector(".strip"), n = st && st.querySelector(".chip.now");
+    if (n) st.scrollLeft = n.offsetLeft - st.offsetLeft - (st.clientWidth - n.offsetWidth) / 2;
+  }
+  // Checklist strip shown on every exercise screen.
+  function sessionStrip() {
+    const tdy = today(), curId = current && current.ex.id;
+    return `<div class="strip" aria-label="Today's exercises">${EX.map((e) => {
+      const done = !!tdy.done[e.id], p = (tdy.prog && tdy.prog[e.id]) || 0, of = e.type === "prompt" ? 1 : repsFor(e);
+      return `<span class="chip ${done ? "done" : ""} ${e.id === curId ? "now" : ""}">${done ? "✓ " : ""}${esc(exT(e.id).name)}${!done && of > 1 && p ? ` ${p}/${of}` : ""}</span>`;
+    }).join("")}</div>`;
+  }
+  function finishSession() {
+    const left = EX.find((e) => !today().done[e.id]);
+    if (left && session && session.k >= session.steps.length) { session = null; return startSession(); }
+    session = null; finished();
+  }
+
   function intro(ex) {
     stopTimer();
     const tx = exT(ex.id);
-    current = { ex, i: 0, phase: "intro", items: ex.type === "prompt" ? ex.items().slice(0, ex.limit || undefined) : null };
-    current.total = current.items ? current.items.length : repsFor(ex);
+    current.phase = "intro";
+    const rotates = ex.type !== "prompt" && EX.filter((e) => e.type !== "prompt").length > 1;
     app.innerHTML = `
-      <div class="top"><button class="icon-btn" id="back">${t("home")}</button><span class="eyebrow">${t("of", { i: EX.indexOf(ex) + 1, n: EX.length })}</span></div>
+      <div class="top"><button class="icon-btn" id="back">${t("home")}</button></div>
+      ${sessionStrip()}
       <div class="card">
         <h1>${tx.name}</h1>
         <p style="font-size:1.15rem">${esc(tx.how)}</p>
         <p class="muted">${t(ex.type === "prompt" ? "toSay" : "times", { n: current.total })} · ${esc(tx.tip)}</p>
+        ${rotates ? `<p class="note">You will take turns between the held-voice exercises, one round each, until all rounds are done.</p>` : ""}
         ${ex.id === "phrases" && S.phraseMode !== "same" ? `<p class="note">${t("mixNote", { n: dailyCount() - CORE })}</p>` : ""}
         <button class="btn btn-ghost" id="hear">${t("hear")}</button>
       </div>
       <button class="btn btn-primary btn-big" id="begin">${t("begin")}</button>`;
     app.querySelector("#back").onclick = home;
+    centerStrip();
     app.querySelector("#hear").onclick = () => speak(tx.name + ". " + tx.how + " " + tx.tip);
-    app.querySelector("#begin").onclick = () => { startMic(); wake(); rep(); };
+    app.querySelector("#begin").onclick = () => { session.seen[ex.id] = true; micUp(); wake(); rep(); };
   }
 
   function repDots() {
@@ -1014,17 +1174,19 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       const sound = S.script === "both" ? it.sound : "";
       if (sound || meaning) body += `<p class="prompt-sub" dir="ltr">${sound ? `<b>${esc(sound)}</b>` : ""}${meaning ? `<span>${esc(meaning)}</span>` : ""}</p>`;
       if (ex.id === "count" && S.practice !== "en") body += `<p class="prompt-sub"><span>${t("sayIn", { lang: LANGS[S.practice].name })}</span></p>`;
-      body += `<button class="btn btn-teal btn-big" id="act">${i + 1 < current.total ? t("saidNext") : t("saidFinish")}</button>`;
+      body += `<button class="btn btn-teal btn-big" id="act">${i + 1 < current.total ? t("saidNext") : `${t("saidNext").split("!")[0]}! ${nextStepLabel()}`}</button>`;
     }
     app.innerHTML = `
       <div class="top"><button class="icon-btn" id="back">${t("home")}</button><h2>${exT(ex.id).name}</h2></div>
+      ${sessionStrip()}
       ${repDots()}
       <div class="card">${body}<div id="meterbox">${meterHTML()}</div></div>
       <p class="muted" style="text-align:center">${esc(exT(ex.id).tip)}</p>`;
+    centerStrip();
     app.querySelector("#back").onclick = home;
     const act = app.querySelector("#act");
-    if (ex.type === "hold") act.onclick = () => current.phase === "holding" ? endHold() : startHold(act);
-    else if (ex.type === "timed") act.onclick = () => startCountdown(act);
+    if (ex.type === "hold") act.onclick = () => { micUp(); current.phase === "holding" ? endHold() : startHold(act); };
+    else if (ex.type === "timed") act.onclick = () => { micUp(); startCountdown(act); };
     else act.onclick = () => { coachAfterPrompt(); nextRep(); };
   }
 
@@ -1064,35 +1226,34 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
   function stopTimer() { clearInterval(timerId); timerId = 0; }
 
   function rest(big, msg, unit) {
-    const last = current.i + 1 >= current.total;
     const tip = coachTip();
     if (tip) speak(tip.text);
     app.querySelector(".card").innerHTML = `
       <div class="timer">${esc(big)}${unit ? `<small>${unit}</small>` : ""}</div>
       <p class="meter-say good">${esc(msg)}</p>
       ${tip ? `<p class="coach ${tip.cls}" aria-live="polite">🎙️ ${esc(tip.text)}</p>` : ""}
-      <p class="muted" style="text-align:center">${last ? t("lastOne") : t("rest")}</p>
-      <button class="btn btn-teal btn-big" id="act">${last ? t("finish") : t("nextOne")}</button>`;
-    app.querySelector("#act").onclick = nextRep;
+      <p class="muted" style="text-align:center">${t("rest")}</p>
+      <button class="btn btn-teal btn-big" id="act">${nextStepLabel()}</button>`;
+    app.querySelector("#act").onclick = completeStep;
   }
 
+  // Word and phrase exercises: next item, then straight on to the next exercise.
   function nextRep() {
     current.i++;
     if (current.i < current.total) return rep();
-    today().done[current.ex.id] = true; save(); track("done-" + current.ex.id);
-    finished(current.ex);
+    completeStep();
   }
 
-  function finished(ex) {
+  function finished() {
     current = null;
     const tdy = today(); const next = EX.find((e) => !tdy.done[e.id]);
     const all = !next;
     let extra = "";
-    if (ex.id === "ahh" && tdy.ahh.length) extra = `<p style="text-align:center">${t("longestToday", { s: Math.max(...tdy.ahh).toFixed(1) })}</p>`;
+    if (tdy.ahh.length) extra = `<p style="text-align:center">${t("longestToday", { s: Math.max(...tdy.ahh).toFixed(1) })}</p>`;
     app.innerHTML = `
       <div class="card" style="text-align:center">
         <div class="celebrate" aria-hidden="true">${all ? "🌼" : "👏"}</div>
-        <h1>${all ? t("allDone") : t("exDone", { ex: exT(ex.id).name })}</h1>
+        <h1>${all ? t("allDone") : t("keepGoing")}</h1>
         ${extra}
         <p class="muted">${all ? (S.name ? esc(S.name) + ", " : "") + t("wonderful") : t("keepGoing")}</p>
       </div>
@@ -1100,7 +1261,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       <button class="btn btn-ghost" id="home">${t("backHome")}</button>`;
     if (all) track("all-done");
     if (all) speak(t("allDone") + " " + t("wonderful"));
-    const n = app.querySelector("#next"); if (n) n.onclick = () => intro(next);
+    const n = app.querySelector("#next"); if (n) n.onclick = () => startSession();
     app.querySelector("#home").onclick = home;
   }
 
