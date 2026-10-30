@@ -1,0 +1,22 @@
+name = "speak-move-coach"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[ai]
+binding = "AI"
+
+[vars]
+MODEL = "@cf/google/gemma-3-12b-it"
+
+# A loose limit of 20 requests a minute per address.
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "7301"
+  [ratelimits.simple]
+  limit = 20
+  period = 60
+
+# No request logs are kept.
+[observability]
+enabled = false

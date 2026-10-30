@@ -25,7 +25,8 @@ The app has two sections, switched with tabs at the top.
   the seated and the supported standing version, so over two rounds each one is done both ways.
   Every exercise page has a Seated / Standing switch, and each version gets its own ✓ once
   done today. After a "yes" to falls or unsteadiness, seated stays the default, and standing
-  is offered only with someone beside you.
+  is offered only with someone beside you. After finishing one version, an "Also do it
+  standing/seated" button lets people do both, or they can just move on.
 - **Animated demos.** Each exercise shows a looping stick-figure animation of the movement,
   matched to the seated or standing version. It holds still when the device asks for reduced motion.
 - **Safety check first.** Four yes/no questions. A "yes" about medical supervision, chest pain
@@ -51,6 +52,16 @@ The app has two sections, switched with tabs at the top.
   then go louder"). It is worked out on the phone from the loudness meter: no recording, no AI
   service, nothing sent anywhere. It comments only on loudness and never changes the plan. It
   can be turned off in Settings.
+
+- **Encouragement in 11 languages.** After a round, a short line of encouragement in the practice
+  language (for example "அருமை! நல்ல சத்தமா இருந்தது." / "Arumai! Nalla sathamaa irundhadhu." /
+  "Great! That was nice and loud."), shown with English letters and the English meaning. It is
+  spoken in that language when the phone has a voice for it, otherwise in English. Movement
+  exercises get encouragement too.
+- **Optional AI-written encouragement** (off by default, needs internet). When turned on, only
+  the practice language, voice or movement, and how loud the round was are sent to a Cloudflare
+  Workers AI service; no name, recording, phrases or health details. Built-in lines are used if
+  it is slow or unavailable. See [coach/README.md](coach/README.md).
 
 - Users can choose a practice style. Styles adjust pacing and the number of rounds; they are
   not treatment plans. The table shows each style and the people who often choose it:
@@ -81,7 +92,7 @@ The app has two sections, switched with tabs at the top.
 - Private: no sign-up and no cookies. Names, phrases and practice history stay on the device.
   The public site counts anonymous visits, finished exercises and the chosen practice language
   with [GoatCounter](https://www.goatcounter.com), with no cookies and no personal data. It
-  never records names, phrases or practice style.
+  never records names, phrases or practice style. The optional AI encouragement is described above.
 
 Add it to the home screen from the browser menu to use it like an app.
 

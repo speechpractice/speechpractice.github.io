@@ -153,6 +153,7 @@ select { font-size: .9rem; text-overflow: ellipsis; }
 .coach { text-align: center; font-family: var(--display); font-weight: 600; font-size: 1.1rem; background: var(--teal-soft); border-radius: 12px; padding: 10px 14px; }
 .coach.warn { color: var(--warn); }
 .coach.good { color: var(--good); }
+.cheer-sub { display: block; font-size: .85rem; font-weight: 500; color: var(--muted); margin-top: 2px; }
 .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--teal-soft); padding: 6px; border-radius: 16px; }
 .tab { min-height: 56px; background: transparent; color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 1.05rem; border-radius: 12px; }
 .tab.on { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
@@ -201,7 +202,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         termsPoints: ["This is a free practice tool for general voice, speaking and gentle physical activity. It is not a prescription, not medical advice and not a medical device.", "Physical exercise can cause falls or injury. Use a sturdy chair or counter for support and have someone nearby if you feel unsteady.", "Check with your medical practitioner before starting, and follow their advice over this app.", "Stop if you feel pain, strain, dizziness, chest discomfort or shortness of breath.", "If speech suddenly becomes slurred or hard to understand, call your local emergency number right away. It can be a sign of a stroke.", "You use this app at your own risk. To the fullest extent permitted by law, its creator is not liable for any injury, loss or unintended consequence.", "Your name and practice history stay on this device."],
         showFull: "Read the full terms and privacy notice", checkAge: "I am 18 or older, or I am a caregiver setting this up for an adult.", checkAgree: "I have read and agree to these terms. I understand this is not medical advice and I use this app at my own risk.",
         agreeBtn: "I agree", declineBtn: "I do not agree", declined: "Speak & Move can only be used after you agree to these terms. If you are unsure, talk to your doctor or speech specialist first. You can come back anytime.", agreedOn: "You agreed to these terms on {date}.",
-        privacy: ["Your name, phrases, settings and practice history are saved only on this device. They are never sent to us or anyone else. Clearing your browser data deletes them.", "On the public website, an anonymous visitor counter (GoatCounter) counts page visits, which exercises are finished, and which practice language is chosen. It uses no cookies and does not record your name, phrases, practice style or anything you type. Your IP address is not stored.", "The spoken coach tips are worked out on this device from the loudness meter. Your voice is never recorded or sent anywhere.", "There are no accounts, ads or tracking across other websites. Questions: open an issue at github.com/speechpractice/speechpractice.github.io."], aboutLink: "Read about safety",
+        privacy: ["Your name, phrases, settings and practice history are saved only on this device. They are never sent to us or anyone else. Clearing your browser data deletes them.", "On the public website, an anonymous visitor counter (GoatCounter) counts page visits, which exercises are finished, and which practice language is chosen. It uses no cookies and does not record your name, phrases, practice style or anything you type. Your IP address is not stored.", "The spoken coach tips are worked out on this device from the loudness meter. Your voice is never recorded or sent anywhere.", "Optional AI-written encouragement is off unless you turn it on in Settings. When it is on, the app sends only your practice language, whether it was voice or movement practice, and how loud the round was (strong, partly or quiet) to a Cloudflare Workers AI service, which writes one short line of encouragement. No name, recording, phrases, practice style or health details are sent. Cloudflare receives your IP address to deliver the request; we do not store it. AI-written lines can be imperfect and are not advice.", "There are no accounts, ads or tracking across other websites. Questions: open an issue at github.com/speechpractice/speechpractice.github.io."], aboutLink: "Read about safety",
         about: ["Intended purpose: Speak & Move is intended to help adults keep a regular habit of general voice, speaking and gentle physical activity practice for everyday wellbeing. It is not intended to diagnose, prevent, monitor, treat or alleviate any disease, injury or disability, and it does not replace or direct any professional care.", "This is not a prescription and not medical advice. Check with your medical practitioner for medical advice about your condition and treatment.", "It is not a medical device. It has not been reviewed, cleared or approved by any health regulator, such as the FDA (US), CDSCO (India), or regulators in the EU, UK, Canada or Australia.", "Practice styles adjust pacing, the number of rounds and which exercises are shown. They are not treatment plans for any condition.", "Physical exercise carries a risk of falls and injury. Use a sturdy chair or counter for support, clear the floor, and have someone nearby if you feel unsteady. Use the seated routine if you have fallen recently or feel unsteady. The exercise safety check is a simple guide, not a medical assessment.", "The loudness meter is a rough practice guide from your phone's microphone. It is not a calibrated measurement and should not be used for medical decisions.", "Talk to your doctor or speech specialist before starting, and follow their advice over this app. This matters most after a recent stroke, surgery or injury.", "Stop and rest if you feel pain, strain, dizziness, faintness, chest discomfort or unusual shortness of breath.", "This app is for adults. It is not designed for children, ALS (motor neurone disease), stuttering, or trouble finding words (aphasia). Ask a speech specialist for exercises suited to those.", "Healthcare professionals who recommend this app should first check the rules of their local regulator and professional body, and follow their own clinical judgment.", "Use at your own risk. To the fullest extent permitted by law, the creator of this app is not liable for any injury, loss or unintended consequence arising from its use. Nothing here limits rights you have, or liability that cannot be limited, under the law of your country.", "The exercises are common voice-practice and general fitness exercises. The app is independent and not affiliated with or endorsed by any commercial voice or exercise program."],
         home: "‹ Home", of: "{i} of {n}", times: "{n} times", toSay: "{n} to say", hear: "🔊 Read this to me", begin: "Begin",
         soft: "soft", target: "target", loud: "loud",
@@ -530,9 +531,11 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
   document.addEventListener("visibilitychange", () => { if (!document.hidden && mic.ctx) { try { mic.ctx.resume(); } catch (e) {} } });
 
   // ---------- speech (read instructions aloud) ----------
-  function speak(text) {
+  const voiceFor = (tag) => { try { const k = tag.slice(0, 2).toLowerCase(); return speechSynthesis.getVoices().find((v) => v.lang && v.lang.toLowerCase().replace("_", "-").startsWith(k)) || null; } catch (e) { return null; } };
+  function speak(text, tag) {
     try {
-      speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "en-US"; u.rate = 0.9;
+      speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = tag || "en-US"; u.rate = 0.9;
+      if (tag) { const v = voiceFor(tag); try { if (v) u.voice = v; } catch (e) {} }
       u.onend = () => { try { if (mic.ctx) mic.ctx.resume(); } catch (e) {} };
       speechSynthesis.speak(u);
     } catch (e) {}
@@ -868,9 +871,12 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         moveVers()[id] = Object.assign(moveVers()[id] || {}, { [ver]: true });
         save();
       }
+      // Offer the other version too, so people can do both or just one.
+      const other = ver === "seat" ? "stand" : "seat";
+      const also = did && hasStand(id) && !(moveVers()[id] || {})[other] && !(other === "stand" && S.seated && fallRisk()) ? { k: mSession.k, ver: other } : null;
       const label = moveNextLabel();
       do { mSession.k++; } while (mSession.k < mSession.steps.length && moveStepDone(mSession.steps[mSession.k]));
-      if (mSession.k < mSession.steps.length) return moveRest(label);
+      if (mSession.k < mSession.steps.length) return moveRest(label, also);
       mSession = null;
       if (movePlan().steps.every((x) => moved()[x])) { track("move-all-done"); return moveDoneScreen(); }
       moveHome();
@@ -888,17 +894,22 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       }, 200);
     };
   }
-  function moveRest(label) {
+  function moveRest(label, also) {
     app.innerHTML = `
       <div class="top"><button class="icon-btn" id="back">${t("home")}</button></div>
       ${moveStrip()}
       <div class="card" style="text-align:center">
         <div class="celebrate" aria-hidden="true">👏</div>
         <h2>Nice work. Rest and breathe.</h2>
+        ${S.coach !== false ? `<p class="coach good" aria-live="polite" id="cheer"></p>` : ""}
         <p class="muted">Sip some water. Take as long as you need.</p>
         <button class="btn btn-primary btn-big" id="mv-next">Next: ${esc(label)}</button>
+        ${also ? `<button class="btn btn-ghost" id="mv-also">Also do it ${also.ver === "stand" ? "standing 🧍" : "seated 🪑"}</button>` : ""}
         <button class="btn btn-ghost" id="mv-stop">Stop for today</button>
       </div>`;
+    if (S.coach !== false) cheer("move", app.querySelector("#cheer"), "move");
+    const ab = app.querySelector("#mv-also");
+    if (ab) ab.onclick = () => { mSession.k = also.k; mSession.pick = { k: also.k, ver: also.ver }; moveRun(); };
     app.querySelector("#back").onclick = () => { mSession = null; home(); };
     centerStrip();
     app.querySelector("#mv-next").onclick = moveRun;
@@ -1301,15 +1312,112 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     ok: ["Good. Keep it loud right to the end.", "Nice. Push from the belly to the finish.", "Good work. Stay strong all the way through."],
     low: ["A bit louder next time, from the belly.", "Take a big breath first, then go louder.", "Think loud, like calling across the room."]
   };
+  // Short encouragement in each practice language: "text|English letters|English meaning".
+  // great/ok/low follow the loudness meter; move is said after a movement exercise.
+  const CHEER = {
+    en: { great: COACH.great.map((x) => x + "||"), ok: COACH.ok.map((x) => x + "||"), low: COACH.low.map((x) => x + "||"),
+      move: ["Well done. Nice and steady.||", "Good work. Keep going at your own pace.||", "Lovely. Big, steady movements.||"] },
+    ta: { great: ["அருமை! நல்ல சத்தமா இருந்தது.|Arumai! Nalla sathamaa irundhadhu.|Great! That was nice and loud.", "சூப்பர் குரல். நல்லா பண்ணீங்க.|Super kural. Nallaa panneenga.|Super voice. Well done."],
+      ok: ["நல்லது. கடைசி வரைக்கும் சத்தமா பேசுங்க.|Nalladhu. Kadaisi varaikkum sathamaa pesunga.|Good. Stay loud right to the end.", "நல்லா இருக்கு. வயித்துல இருந்து குரல் குடுங்க.|Nallaa irukku. Vayithula irundhu kural kudunga.|Nice. Use your voice from the belly."],
+      low: ["அடுத்த தடவை இன்னும் கொஞ்சம் சத்தமா.|Adutha thadavai innum konjam sathamaa.|A bit louder next time.", "முதல்ல நல்லா மூச்சு இழுங்க, அப்புறம் சத்தமா பேசுங்க.|Mudhalla nallaa moochu izhunga, appuram sathamaa pesunga.|Take a big breath first, then speak louder."],
+      move: ["சபாஷ்! நல்லா பண்ணீங்க.|Sabaash! Nallaa panneenga.|Bravo! Well done.", "நல்ல வேலை. மெதுவா, நிதானமா தொடருங்க.|Nalla velai. Medhuvaa, nidhaanamaa thodarunga.|Good work. Keep going slowly and steadily."] },
+    hi: { great: ["शाबाश! आवाज़ बहुत अच्छी और ऊँची थी।|Shaabaash! Aawaaz bahut achchhi aur oonchi thi.|Well done! Your voice was nice and loud.", "बहुत बढ़िया, मज़बूत आवाज़।|Bahut badhiya, mazboot aawaaz.|Excellent, a strong voice."],
+      ok: ["अच्छा है। आख़िर तक ऊँची आवाज़ रखिए।|Achchha hai. Aakhir tak oonchi aawaaz rakhiye.|Good. Keep it loud to the end.", "अच्छा। पेट से ज़ोर लगाकर बोलिए।|Achchha. Pet se zor lagaakar boliye.|Good. Push from the belly."],
+      low: ["अगली बार थोड़ा और ज़ोर से।|Agli baar thoda aur zor se.|A bit louder next time.", "पहले गहरी साँस लीजिए, फिर ज़ोर से बोलिए।|Pehle gehri saans lijiye, phir zor se boliye.|Take a deep breath first, then speak louder."],
+      move: ["शाबाश! बहुत अच्छा किया।|Shaabaash! Bahut achchha kiya.|Well done!", "बढ़िया। धीरे-धीरे, आराम से करते रहिए।|Badhiya. Dheere-dheere, aaraam se karte rahiye.|Great. Keep going slowly and comfortably."] },
+    es: { great: ["¡Muy bien, fuerte y claro!||Very good, loud and clear!", "¡Qué voz tan fuerte! Bien hecho.||What a strong voice! Well done."],
+      ok: ["Bien. Mantén la voz fuerte hasta el final.||Good. Keep your voice loud to the end.", "Bien. Empuja desde el abdomen.||Good. Push from the belly."],
+      low: ["Un poco más fuerte la próxima vez.||A little louder next time.", "Respira hondo primero y luego habla más fuerte.||Breathe deeply first, then speak louder."],
+      move: ["¡Bien hecho!||Well done!", "Muy bien. Sigue con calma, a tu ritmo.||Very good. Keep going calmly, at your own pace."] },
+    fr: { great: ["Bravo, c'est fort et clair !||Bravo, loud and clear!", "Belle voix forte. Bien joué !||Nice strong voice. Well done!"],
+      ok: ["Bien. Gardez une voix forte jusqu'au bout.||Good. Keep a strong voice to the end.", "Bien. Poussez depuis le ventre.||Good. Push from the belly."],
+      low: ["Un peu plus fort la prochaine fois.||A little louder next time.", "Prenez d'abord une grande inspiration, puis parlez plus fort.||Take a big breath first, then speak louder."],
+      move: ["Bravo, bien joué !||Bravo, well done!", "Très bien. Continuez calmement, à votre rythme.||Very good. Keep going calmly, at your own pace."] },
+    pt: { great: ["Muito bem, forte e claro!||Very good, loud and clear!", "Que voz forte! Parabéns!||What a strong voice! Congratulations!"],
+      ok: ["Bom. Mantenha a voz forte até o fim.||Good. Keep your voice strong to the end.", "Bom. Use a força da barriga.||Good. Use the strength of your belly."],
+      low: ["Um pouco mais alto da próxima vez.||A little louder next time.", "Respire fundo primeiro e depois fale mais alto.||Breathe deeply first, then speak louder."],
+      move: ["Muito bem!||Very good!", "Ótimo. Continue com calma, no seu ritmo.||Great. Keep going calmly, at your own pace."] },
+    id: { great: ["Bagus sekali, suaranya keras dan jelas!||Very good, loud and clear!", "Suara yang kuat. Hebat!||A strong voice. Great!"],
+      ok: ["Bagus. Pertahankan suara keras sampai akhir.||Good. Keep your voice loud to the end.", "Bagus. Dorong suara dari perut.||Good. Push your voice from the belly."],
+      low: ["Lain kali sedikit lebih keras, ya.||A little louder next time.", "Tarik napas dalam dulu, lalu bicara lebih keras.||Take a deep breath first, then speak louder."],
+      move: ["Hebat, kerja bagus!||Great, good work!", "Bagus. Lanjutkan pelan-pelan dengan tenang.||Good. Keep going slowly and calmly."] },
+    ru: { great: ["Отлично, громко и чётко!|Otlichno, gromko i chyotko!|Excellent, loud and clear!", "Сильный голос. Молодец!|Silny golos. Molodets!|A strong voice. Well done!"],
+      ok: ["Хорошо. Держите громкость до самого конца.|Khorosho. Derzhite gromkost do samogo kontsa.|Good. Keep it loud right to the end.", "Хорошо. Говорите с опорой на живот.|Khorosho. Govorite s oporoy na zhivot.|Good. Speak with support from the belly."],
+      low: ["В следующий раз чуть громче.|V sleduyushchiy raz chut gromche.|A little louder next time.", "Сначала глубоко вдохните, потом говорите громче.|Snachala gluboko vdokhnite, potom govorite gromche.|Take a deep breath first, then speak louder."],
+      move: ["Молодец, отлично получилось!|Molodets, otlichno poluchilos!|Well done, that went great!", "Хорошо. Продолжайте спокойно, в своём темпе.|Khorosho. Prodolzhayte spokoyno, v svoyom tempe.|Good. Keep going calmly, at your own pace."] },
+    ar: { great: ["رائع! صوت قوي وواضح.|Raa'i! Sawt qawi wa wadih.|Great! A strong, clear voice.", "عمل ممتاز وصوت قوي.|'Amal mumtaz wa sawt qawi.|Excellent work and a strong voice."],
+      ok: ["جيد. صوت قوي حتى النهاية.|Jayyid. Sawt qawi hatta an-nihaya.|Good. A strong voice right to the end.", "جيد. القوة من البطن.|Jayyid. Al-quwwa min al-batn.|Good. Power from the belly."],
+      low: ["صوت أعلى قليلًا في المرة القادمة.|Sawt a'la qalilan fil-marra al-qadima.|A slightly louder voice next time.", "نفس عميق أولًا، ثم صوت أعلى.|Nafas 'amiq awwalan, thumma sawt a'la.|A deep breath first, then a louder voice."],
+      move: ["عمل رائع!|'Amal raa'i!|Great work!", "ممتاز. خطوة بخطوة، بهدوء.|Mumtaz. Khutwa bi-khutwa, bi-hudu'.|Excellent. Step by step, calmly."] },
+    zh: { great: ["太棒了，声音又响又清楚！|Tài bàng le, shēngyīn yòu xiǎng yòu qīngchu!|Great, loud and clear!", "声音很有力，做得好！|Shēngyīn hěn yǒulì, zuò de hǎo!|A strong voice, well done!"],
+      ok: ["很好。坚持大声到最后。|Hěn hǎo. Jiānchí dàshēng dào zuìhòu.|Very good. Stay loud to the end.", "不错。用腹部的力量发声。|Búcuò. Yòng fùbù de lìliàng fāshēng.|Nice. Use the strength of your belly."],
+      low: ["下次再大声一点。|Xià cì zài dàshēng yìdiǎn.|A bit louder next time.", "先深吸一口气，再大声说。|Xiān shēn xī yì kǒu qì, zài dàshēng shuō.|Take a deep breath first, then speak loudly."],
+      move: ["做得好！|Zuò de hǎo!|Well done!", "很好。慢慢来，保持平稳。|Hěn hǎo. Mànmàn lái, bǎochí píngwěn.|Very good. Take it slowly and steadily."] },
+    bn: { great: ["দারুণ! খুব জোরে আর স্পষ্ট।|Darun! Khub jore ar spashto.|Great! Very loud and clear.", "জোরালো গলা। খুব ভালো হয়েছে।|Joralo gola. Khub bhalo hoyeche.|A strong voice. Very well done."],
+      ok: ["ভালো। শেষ পর্যন্ত জোরে বলুন।|Bhalo. Shesh porjonto jore bolun.|Good. Speak loudly to the end.", "ভালো। পেট থেকে জোর দিয়ে বলুন।|Bhalo. Pet theke jor diye bolun.|Good. Push from the belly."],
+      low: ["পরের বার আরেকটু জোরে।|Porer bar arektu jore.|A bit louder next time.", "আগে গভীর শ্বাস নিন, তারপর জোরে বলুন।|Age gobhir shash nin, tarpor jore bolun.|Take a deep breath first, then speak loudly."],
+      move: ["দারুণ, খুব ভালো হয়েছে!|Darun, khub bhalo hoyeche!|Great, very well done!", "ভালো। ধীরে ধীরে, শান্তভাবে চালিয়ে যান।|Bhalo. Dhire dhire, shantobhabe chaliye jan.|Good. Keep going slowly and calmly."] }
+  };
   const coachOn = () => S.coach !== false && mic.state === "on";
   const coachTalking = () => { try { return speechSynthesis.speaking; } catch (e) { return false; } };
   const measuring = () => (current.phase === "holding") || (current.phase === "counting") || (current.phase === "ready" && current.ex.type === "prompt");
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-  // Returns a tip for the round just finished, or null if there was too little voice to judge.
+  // Returns how the round just finished went, or null if there was too little voice to judge.
   function coachTip() {
     if (!coachOn() || !current || !current.cv || current.cv.voiced < 15) return null;
     const r = current.cv.loud / current.cv.voiced;
-    return r >= 0.75 ? { text: pick(COACH.great), cls: "good" } : r >= 0.4 ? { text: pick(COACH.ok), cls: "good" } : { text: pick(COACH.low), cls: "warn" };
+    return r >= 0.75 ? { level: "great", cls: "good" } : r >= 0.4 ? { level: "ok", cls: "good" } : { level: "low", cls: "warn" };
+  }
+  function localCheer(level) {
+    const lang = CHEER[S.practice] ? S.practice : "en";
+    const [text, sound, meaning] = pick(CHEER[lang][level]).split("|");
+    return { text, sound, meaning, lang };
+  }
+  // Said in the practice language when the phone has a voice for it, otherwise in English.
+  function sayCheer(c) {
+    if (c.lang === "en" || !c.meaning) return speak(c.text);
+    const tag = LANGS[c.lang].tts;
+    if (voiceFor(tag)) speak(c.text, tag); else speak(c.meaning);
+  }
+  function cheerHTML(c) {
+    const latin = S.script === "latin" && c.sound, main = latin ? c.sound : c.text;
+    const dir = latin ? "ltr" : (LANGS[c.lang] && LANGS[c.lang].dir) || "ltr";
+    return `<span lang="${latin ? "en" : c.lang}" dir="${dir}">🎙️ ${esc(main)}</span>`
+      + (S.script === "both" && c.sound ? `<small class="cheer-sub">${esc(c.sound)}</small>` : "")
+      + (c.meaning ? `<small class="cheer-sub">${esc(c.meaning)}</small>` : "")
+      + (c.ai ? `<small class="cheer-sub">✨ Written by AI</small>` : "");
+  }
+
+  // Optional AI-written encouragement, off unless turned on in Settings. Only the practice
+  // language, the section (voice or movement) and how the round went are sent: never a name,
+  // recording, phrase, practice style or health detail. Built-in lines are used if it is slow.
+  const COACH_URL = ""; // the Cloudflare Worker address, once deployed (see coach/README.md)
+  const AI_PER_DAY = 15;
+  const aiOn = () => !!COACH_URL && S.aiCheer === true;
+  function aiCheer(kind, level) {
+    const tdy = today(); tdy.ai = tdy.ai || 0;
+    if (!aiOn() || tdy.ai >= AI_PER_DAY || navigator.onLine === false) return Promise.resolve(null);
+    tdy.ai++; save();
+    const ctl = new AbortController(); setTimeout(() => ctl.abort(), 2500);
+    // text/plain keeps this a "simple" request, so the browser does not send a CORS preflight.
+    return fetch(COACH_URL, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ lang: S.practice, kind, level }), signal: ctl.signal })
+      .then((r) => r.ok ? r.json() : null)
+      .then((c) => c && typeof c.say === "string" && c.say ? { text: c.say.slice(0, 140), sound: String(c.latin || "").slice(0, 160), meaning: String(c.en || "").slice(0, 140), lang: CHEER[S.practice] ? S.practice : "en", ai: true } : null)
+      .catch(() => null);
+  }
+  // Shows a built-in line at once. With AI on, waits briefly for an AI line and uses it if it comes.
+  function cheer(level, el, kind) {
+    const local = localCheer(level);
+    if (el) el.innerHTML = cheerHTML(local);
+    if (!aiOn()) return sayCheer(local);
+    let settled = false;
+    const fall = setTimeout(() => { if (!settled) { settled = true; sayCheer(local); } }, 1800);
+    aiCheer(kind, level).then((c) => {
+      if (settled) return;
+      settled = true; clearTimeout(fall);
+      if (c && el && el.isConnected) el.innerHTML = cheerHTML(c);
+      sayCheer(c || local);
+    });
   }
   function coachAfterPrompt() {
     const tip = coachTip();
@@ -1317,11 +1425,11 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     if (tip.cls === "warn") {
       current.goodRun = 0;
       // Never nag twice in a row.
-      if (current.lastLowCue !== current.i - 1) { current.lastLowCue = current.i; speak("A little louder on the next one."); }
+      if (current.lastLowCue !== current.i - 1) { current.lastLowCue = current.i; sayCheer(localCheer("low")); }
       return;
     }
     current.goodRun = (current.goodRun || 0) + 1;
-    if (current.goodRun % 3 === 0) speak(pick(COACH.great));
+    if (current.goodRun % 3 === 0) sayCheer(localCheer("great"));
   }
 
   function rep() {
@@ -1397,13 +1505,13 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
 
   function rest(big, msg, unit) {
     const tip = coachTip();
-    if (tip) speak(tip.text);
     app.querySelector(".card").innerHTML = `
       <div class="timer">${esc(big)}${unit ? `<small>${unit}</small>` : ""}</div>
       <p class="meter-say good">${esc(msg)}</p>
-      ${tip ? `<p class="coach ${tip.cls}" aria-live="polite">🎙️ ${esc(tip.text)}</p>` : ""}
+      ${tip ? `<p class="coach ${tip.cls}" aria-live="polite" id="cheer"></p>` : ""}
       <p class="muted" style="text-align:center">${t("rest")}</p>
       <button class="btn btn-teal btn-big" id="act">${nextStepLabel()}</button>`;
+    if (tip) cheer(tip.level, app.querySelector("#cheer"), "speak");
     app.querySelector("#act").onclick = completeStep;
   }
 
@@ -1440,7 +1548,8 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       <div class="top"><button class="icon-btn" id="back">${t("home")}</button><h1>${t("settings")}</h1></div>
       <div class="card">
         <label for="s-name">${t("nameLabel")}<input id="s-name" value="${esc(S.name)}"></label>
-        <label class="check-row" for="s-coach"><input type="checkbox" id="s-coach"> Spoken coach tips during voice practice (uses the loudness meter on this phone only)</label>
+        <label class="check-row" for="s-coach"><input type="checkbox" id="s-coach"> Spoken encouragement and coach tips, in your practice language when this phone has a voice for it (worked out on this phone)</label>
+        ${COACH_URL ? `<label class="check-row" for="s-ai"><input type="checkbox" id="s-ai"> Optional: AI-written encouragement (needs internet). Sends only your practice language, voice or movement, and how loud the round was. No name, recording or health details.</label>` : ""}
         <label class="check-row" for="s-seated"><input type="checkbox" id="s-seated"> Seated exercise routine (Move)</label>
         <button class="btn btn-ghost" id="s-recheck">Redo the exercise safety check</button>
         <label for="s-cond">${esc(condText().label)}
@@ -1492,6 +1601,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     app.querySelector("#s-cond").value = S.condition;
     app.querySelector("#s-seated").checked = !!S.seated;
     app.querySelector("#s-coach").checked = S.coach !== false;
+    if (app.querySelector("#s-ai")) app.querySelector("#s-ai").checked = S.aiCheer === true;
     app.querySelector("#s-recheck").onclick = () => { S.tab = "move"; moveCheck(); };
     app.querySelector("#s-phrases").value = S.phraseMode;
     app.querySelector("#back").onclick = home;
@@ -1503,6 +1613,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       S.script = app.querySelector("#s-script").value;
       S.condition = app.querySelector("#s-cond").value; buildPlan();
       S.coach = app.querySelector("#s-coach").checked;
+      if (app.querySelector("#s-ai")) { const on = app.querySelector("#s-ai").checked; if (on && !S.aiCheer) track("ai-cheer-on"); S.aiCheer = on; }
       const wantSeated = app.querySelector("#s-seated").checked;
       S.seated = wantSeated || !!(S.moveCheck && S.moveCheck.answers[3]);
       S.phraseMode = app.querySelector("#s-phrases").value;
