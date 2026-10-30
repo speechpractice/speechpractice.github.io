@@ -21,6 +21,11 @@ The app has two sections, switched with tabs at the top.
   knee straightening, side steps, supported balance, punches, a steady walk, stretches and
   calm breathing. Each one has a **seated** version and a **standing** version done holding a
   sturdy chair or counter.
+- **Seated and standing mix.** With the seated routine on, the main exercises alternate between
+  the seated and the supported standing version, so over two rounds each one is done both ways.
+  Every exercise page has a Seated / Standing switch, and each version gets its own ✓ once
+  done today. After a "yes" to falls or unsteadiness, seated stays the default, and standing
+  is offered only with someone beside you.
 - **Animated demos.** Each exercise shows a looping stick-figure animation of the movement,
   matched to the seated or standing version. It holds still when the device asks for reduced motion.
 - **Safety check first.** Four yes/no questions. A "yes" about medical supervision, chest pain

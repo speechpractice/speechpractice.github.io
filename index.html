@@ -145,6 +145,11 @@ select { font-size: .9rem; text-overflow: ellipsis; }
 .chip { flex: none; font-size: .72rem; font-family: var(--display); font-weight: 600; padding: 6px 10px; border-radius: 999px; background: var(--meter-bg); color: var(--muted); white-space: nowrap; }
 .chip.done { background: var(--good); color: var(--surface); }
 .chip.now { outline: 2px solid var(--marigold); color: var(--ink); }
+.ver { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ver button { font: 600 1rem var(--display); padding: 12px 8px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.ver button.on { border-color: var(--teal); background: var(--teal-soft); }
+.ver button { white-space: nowrap; }
+.ver button .ck { color: var(--good); font-weight: 700; }
 .coach { text-align: center; font-family: var(--display); font-weight: 600; font-size: 1.1rem; background: var(--teal-soft); border-radius: 12px; padding: 10px 14px; }
 .coach.warn { color: var(--warn); }
 .coach.good { color: var(--good); }
@@ -666,16 +671,25 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     const ids = movePlan().steps;
     const warm = ids.slice(0, 1), cool = ids.filter((id) => COOL.includes(id)), main = ids.slice(1).filter((id) => !COOL.includes(id));
     const R = moveRounds(), steps = warm.map((id) => ({ id, r: 0, of: 1 }));
-    for (let r = 0; r < R; r++) main.forEach((id) => steps.push({ id, r, of: R }));
+    // "mix" alternates seated and standing across exercises and rounds, so in the mixed
+    // routine each main exercise is done both ways over two rounds.
+    for (let r = 0; r < R; r++) main.forEach((id, i) => steps.push({ id, r, of: R, mix: (i + r) % 2 === 1 }));
     cool.forEach((id) => steps.push({ id, r: 0, of: 1 }));
     return steps;
   }
   const moveMinutes = () => Math.max(5, Math.round(moveSteps().reduce((a, st) => a + moveSecs(MOVES[st.id]) + 20, 0) / 60));
+  // Seated or standing version. Standing-with-support routine: standing. Seated routine: a mix of
+  // seated and supported standing, except after a "yes" to falls or unsteadiness, where seated is
+  // the default and standing is offered only with someone nearby.
+  const fallRisk = () => !!(S.moveCheck && S.moveCheck.answers && S.moveCheck.answers[3]);
+  const hasStand = (id) => MOVES[id].stand !== MOVES[id].seat && !!(ANIM[id] && ANIM[id].stand);
+  const defaultVer = (st) => !hasStand(st.id) ? "seat" : !S.seated ? "stand" : fallRisk() ? "seat" : st.mix ? "stand" : "seat";
+  const moveVers = () => { const tdy = today(); tdy.moveVer = tdy.moveVer || {}; return tdy.moveVer; };
   const moveProg = () => { const tdy = today(); tdy.moveProg = tdy.moveProg || {}; return tdy.moveProg; };
   const moveStepDone = (st) => moved()[st.id] || (moveProg()[st.id] || 0) > st.r;
   let mSession = null;
   function startMove(fromId, redo) {
-    if (redo) { const tdy = today(); tdy.moved = {}; tdy.moveProg = {}; save(); }
+    if (redo) { const tdy = today(); tdy.moved = {}; tdy.moveProg = {}; tdy.moveVer = {}; save(); }
     const steps = moveSteps();
     let k = fromId ? steps.findIndex((st) => st.id === fromId && !moveStepDone(st)) : steps.findIndex((st) => !moveStepDone(st));
     if (fromId && k < 0) { delete moved()[fromId]; moveProg()[fromId] = 0; save(); k = steps.findIndex((st) => st.id === fromId); }
@@ -746,7 +760,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         <button class="btn btn-ghost" id="mv-redo">Answer the questions again</button>
       </div>` : `<div class="card">
         <div><h2>${doneCount === plan.steps.length ? "All movement done today. Well done!" : "Today's movement"}</h2>
-        <p class="muted">${doneCount} of ${plan.steps.length} done · about ${moveMinutes()} minutes · ${S.seated ? "seated routine" : "standing with support"}${moveRounds() > 1 ? " · main exercises twice, as a circuit" : ""}</p></div>
+        <p class="muted">${doneCount} of ${plan.steps.length} done · about ${moveMinutes()} minutes · ${!S.seated ? "standing with support" : fallRisk() ? "seated routine" : "seated and standing mix"}${moveRounds() > 1 ? " · main exercises twice, as a circuit" : ""}</p></div>
         ${next ? `<button class="btn btn-primary btn-big pulse" id="mv-go">${doneCount || Object.keys(moveProg()).length ? t("cont") : t("start")}: ${MOVES[next].name}</button>`
                : `<button class="btn btn-ghost" id="mv-again">Do the routine again</button>`}
         <ul class="ex-list">
@@ -754,7 +768,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
             <span class="chk" aria-hidden="true">${done[id] ? "✓" : ""}</span>
             <span class="t"><b>${MOVES[id].name}</b><small>${MOVES[id].short}${!done[id] && moveProg()[id] ? ` · ${moveProg()[id]}/${moveRounds()} rounds` : ""}</small></span></button></li>`).join("")}
         </ul>
-        <button class="btn btn-ghost" id="mv-mode">${S.seated ? "Seated routine is on" : "Switch to the seated routine"}</button>
+        <button class="btn btn-ghost" id="mv-mode">${!S.seated ? "Switch to the seated routine" : fallRisk() ? "Seated routine is on" : "Seated and standing mix is on"}</button>
       </div>
       <div class="card">
         <h2>Progress</h2>
@@ -818,12 +832,16 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     const st = mSession.steps[mSession.k];
     if (!st) { mSession = null; return moveHome(); }
     const id = st.id, m = MOVES[id];
-    const how = S.seated ? m.seat : m.stand;
+    const ver = (mSession.pick && mSession.pick.k === mSession.k) ? mSession.pick.ver : defaultVer(st);
+    const how = ver === "seat" ? m.seat : m.stand, vd = moveVers()[id] || {};
+    const verBtn = (v, label) => `<button data-ver="${v}" class="${ver === v ? "on" : ""}" aria-pressed="${ver === v}">${vd[v] ? `<span class="ck">✓</span> ` : ""}${label}</button>`;
     app.innerHTML = `
-      <div class="top"><button class="icon-btn" id="back">${t("home")}</button><span class="eyebrow">${st.of > 1 ? `Round ${st.r + 1} of ${st.of} · ` : ""}${S.seated ? "Seated" : "Standing with support"}</span></div>
+      <div class="top"><button class="icon-btn" id="back">${t("home")}</button><span class="eyebrow">${st.of > 1 ? `Round ${st.r + 1} of ${st.of} · ` : ""}${ver === "seat" ? "Seated" : "Standing"}</span></div>
       ${moveStrip()}
       <div class="card">
         <h1>${m.name}</h1>
+        ${hasStand(id) ? `<div class="ver" role="group" aria-label="Version">${verBtn("seat", "🪑 Seated")}${verBtn("stand", "🧍 Standing")}</div>` : ""}
+        ${ver === "stand" && S.seated && fallRisk() ? `<p class="note">Only with someone beside you, holding a sturdy chair or counter.</p>` : ""}
         <svg class="anim" id="mv-anim" viewBox="0 0 200 200" role="img" aria-label="${esc(m.name)}: animated example"></svg>
         <p style="font-size:1.15rem">${esc(how)}</p>
         <div class="timer" id="mv-clock">${m.type === "time" ? fmtSecs(m.secs) : m.reps + "<small> times</small>"}</div>
@@ -836,13 +854,18 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       <button class="btn btn-ghost" id="mv-skip">Skip this one</button>`;
     app.querySelector("#back").onclick = () => { mSession = null; home(); };
     centerStrip();
-    playAnim(app.querySelector("#mv-anim"), animFor(id));
+    playAnim(app.querySelector("#mv-anim"), animFor(id, ver));
+    app.querySelectorAll("[data-ver]").forEach((b) => b.onclick = () => {
+      if (b.dataset.ver === ver) return;
+      mSession.pick = { k: mSession.k, ver: b.dataset.ver }; moveRun();
+    });
     app.querySelector("#mv-hear").onclick = () => speak(m.name + ". " + how + " " + m.tip);
     const finish = (did) => {
       stopTimer();
       if (did) {
         const p = moveProg(); p[id] = Math.max(p[id] || 0, st.r + 1);
         if (p[id] >= st.of) moved()[id] = true;
+        moveVers()[id] = Object.assign(moveVers()[id] || {}, { [ver]: true });
         save();
       }
       const label = moveNextLabel();
@@ -959,7 +982,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       seat: { view: "front", prop: "seatF", dur: 3000, breath: true, poses: [P(FSP, 0, FSLAP, FSFEET), P(FSP, 0, [[88, 147], [112, 147]], FSFEET, { shrug: 4 })] }
     }
   };
-  const animFor = (id) => { const a = ANIM[id]; if (!a) return null; return (S.seated ? a.seat : a.stand) || a.seat || a.stand; };
+  const animFor = (id, ver) => { const a = ANIM[id]; if (!a) return null; return (ver === "seat" ? a.seat : a.stand) || a.seat || a.stand; };
 
   function ik(a, t, l1, l2, bend) {
     let dx = t[0] - a[0], dy = t[1] - a[1], d = Math.hypot(dx, dy);
