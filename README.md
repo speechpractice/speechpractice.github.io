@@ -14,8 +14,20 @@ The app has two sections, switched with tabs at the top.
 
 ### 🏃 Move
 
-- **Circuit format.** A warm-up, then the main exercises in a circuit, twice (once in the
-  short-session style), then a cool-down, moving on with one tap. Each finished exercise gets a ✓.
+- **Circuit format.** A warm-up, then the main exercises as a circuit (A B C D, A B C D …),
+  then a cool-down, moving on with one tap. Each finished exercise gets a ✓. A circuit rests each
+  muscle group while another works and keeps the heart rate up; for older adults it builds
+  strength about as well as finishing every set of one exercise first.
+- **Rounds build up.** Each practice style starts gentle and adds a round after 6 full movement
+  days in the last 2 weeks, following the 1 to 3 sets in published guidance:
+
+  | Style | Starts at | Builds to |
+  |---|---|---|
+  | Parkinson's, stroke, aging, general | 2 rounds | 3 rounds |
+  | Brain injury | 2 rounds | 2 rounds (steady pace) |
+  | MS | 1 round | 2 rounds (avoids fatigue and overheating) |
+
+  Settings can fix it at 1, 2 or 3 rounds instead.
 
 - A short daily routine of gentle exercises: marching, wide reaches, sit to stand, heel raises,
   knee straightening, side steps, supported balance, punches, a steady walk, stretches and

@@ -669,7 +669,19 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
   // A circuit rests each muscle group while another works, and is at least as effective as
   // finishing all sets of one exercise before the next.
   const COOL = ["stretch", "breathe"];
-  const moveRounds = () => S.condition === "ms" ? 1 : 2;
+  // Rounds of the circuit for each style, [starting, after building up]. Guidelines for
+  // Parkinson's (Parkinson's Foundation/ACSM), stroke (AHA), older adults (ACSM/WHO) and MS
+  // (Kalb 2020) suggest 1 to 3 sets, starting low and adding a set as it gets easier; MS stays
+  // shorter to avoid fatigue and overheating, and brain injury stays at a steady pace.
+  const MOVE_ROUNDS = { pd: [2, 3], stroke: [2, 3], aging: [2, 3], general: [2, 3], tbi: [2, 2], ms: [1, 2] };
+  const BUILD_DAYS = 6; // full Move days in the last 14 (not counting today) before adding a round
+  function fullMoveDays() {
+    let n = 0; const d = new Date();
+    for (let i = 1; i <= 14; i++) { d.setDate(d.getDate() - 1); const h = S.history[dayKey(d)]; if (h && h.moveAll) n++; }
+    return n;
+  }
+  const roundRange = () => MOVE_ROUNDS[S.condition] || MOVE_ROUNDS.general;
+  const moveRounds = () => S.moveRounds ? S.moveRounds : (fullMoveDays() >= BUILD_DAYS ? roundRange()[1] : roundRange()[0]);
   function moveSteps() {
     const ids = movePlan().steps;
     const warm = ids.slice(0, 1), cool = ids.filter((id) => COOL.includes(id)), main = ids.slice(1).filter((id) => !COOL.includes(id));
@@ -763,7 +775,8 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         <button class="btn btn-ghost" id="mv-redo">Answer the questions again</button>
       </div>` : `<div class="card">
         <div><h2>${doneCount === plan.steps.length ? "All movement done today. Well done!" : "Today's movement"}</h2>
-        <p class="muted">${doneCount} of ${plan.steps.length} done · about ${moveMinutes()} minutes · ${!S.seated ? "standing with support" : fallRisk() ? "seated routine" : "seated and standing mix"}${moveRounds() > 1 ? " · main exercises twice, as a circuit" : ""}</p></div>
+        <p class="muted">${doneCount} of ${plan.steps.length} done · about ${moveMinutes()} minutes · ${!S.seated ? "standing with support" : fallRisk() ? "seated routine" : "seated and standing mix"}${moveRounds() > 1 ? ` · main exercises ${moveRounds() === 2 ? "twice" : moveRounds() + " times"}, as a circuit` : ""}</p>
+        ${!S.moveRounds && moveRounds() < roundRange()[1] ? `<p class="note">Builds to ${roundRange()[1]} rounds after ${BUILD_DAYS} full days of movement (${fullMoveDays()} so far in the last 2 weeks).</p>` : ""}</div>
         ${next ? `<button class="btn btn-primary btn-big pulse" id="mv-go">${doneCount || Object.keys(moveProg()).length ? t("cont") : t("start")}: ${MOVES[next].name}</button>`
                : `<button class="btn btn-ghost" id="mv-again">Do the routine again</button>`}
         <ul class="ex-list">
@@ -878,7 +891,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       do { mSession.k++; } while (mSession.k < mSession.steps.length && moveStepDone(mSession.steps[mSession.k]));
       if (mSession.k < mSession.steps.length) return moveRest(label, also);
       mSession = null;
-      if (movePlan().steps.every((x) => moved()[x])) { track("move-all-done"); return moveDoneScreen(); }
+      if (movePlan().steps.every((x) => moved()[x])) { today().moveAll = true; save(); track("move-all-done"); return moveDoneScreen(); }
       moveHome();
     };
     app.querySelector("#mv-done").onclick = () => finish(true);
@@ -1551,6 +1564,13 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         <label class="check-row" for="s-coach"><input type="checkbox" id="s-coach"> Spoken encouragement and coach tips, in your practice language when this phone has a voice for it (worked out on this phone)</label>
         ${COACH_URL ? `<label class="check-row" for="s-ai"><input type="checkbox" id="s-ai"> Optional: AI-written encouragement (needs internet). Sends only your practice language, voice or movement, and how loud the round was. No name, recording or health details.</label>` : ""}
         <label class="check-row" for="s-seated"><input type="checkbox" id="s-seated"> Seated exercise routine (Move)</label>
+        <label for="s-rounds">Move rounds (the main exercises as a circuit: A B C D, then again)
+          <select id="s-rounds">
+            <option value="0">Automatic (recommended): starts gentle and builds up</option>
+            <option value="1">1 round</option>
+            <option value="2">2 rounds</option>
+            <option value="3">3 rounds</option>
+          </select></label>
         <button class="btn btn-ghost" id="s-recheck">Redo the exercise safety check</button>
         <label for="s-cond">${esc(condText().label)}
           <select id="s-cond">${condOptions()}</select></label>
@@ -1600,6 +1620,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     app.querySelector("#s-script").value = S.script;
     app.querySelector("#s-cond").value = S.condition;
     app.querySelector("#s-seated").checked = !!S.seated;
+    app.querySelector("#s-rounds").value = String(S.moveRounds || 0);
     app.querySelector("#s-coach").checked = S.coach !== false;
     if (app.querySelector("#s-ai")) app.querySelector("#s-ai").checked = S.aiCheer === true;
     app.querySelector("#s-recheck").onclick = () => { S.tab = "move"; moveCheck(); };
@@ -1614,6 +1635,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       S.condition = app.querySelector("#s-cond").value; buildPlan();
       S.coach = app.querySelector("#s-coach").checked;
       if (app.querySelector("#s-ai")) { const on = app.querySelector("#s-ai").checked; if (on && !S.aiCheer) track("ai-cheer-on"); S.aiCheer = on; }
+      S.moveRounds = +app.querySelector("#s-rounds").value || 0;
       const wantSeated = app.querySelector("#s-seated").checked;
       S.seated = wantSeated || !!(S.moveCheck && S.moveCheck.answers[3]);
       S.phraseMode = app.querySelector("#s-phrases").value;
