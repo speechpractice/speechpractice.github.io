@@ -744,14 +744,22 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       <button role="tab" class="tab ${active === "move" ? "on" : ""}" id="tab-move" aria-selected="${active === "move"}">🏃 Move</button>
     </div>`;
   }
+  // Loads the newest version of the app. Settings and progress are kept: they live in this
+  // device's storage, not in the app's code.
+  function refreshApp() {
+    save();
+    const go = () => location.replace(location.pathname + "?v=" + Date.now());
+    try { fetch(location.pathname, { cache: "reload" }).then(go, go); } catch (e) { go(); }
+  }
   function wireTabs() {
+    const r = app.querySelector("#refresh"); if (r) r.onclick = refreshApp;
     app.querySelector("#tab-speak").onclick = () => { S.tab = "speak"; save(); home(); };
     app.querySelector("#tab-move").onclick = () => { S.tab = "move"; save(); home(); };
   }
   function header() {
     return `<div class="top">
         <div><p class="eyebrow">Speak &amp; Move</p><h1>${greeting()}${S.name ? ", " + esc(S.name) : ""}</h1></div>
-        <div class="top-actions"><button class="icon-btn" id="settings" aria-label="${t("settings")}">⚙️</button></div>
+        <div class="top-actions"><button class="icon-btn" id="refresh" aria-label="Refresh the app" title="Refresh the app">🔄</button><button class="icon-btn" id="settings" aria-label="${t("settings")}">⚙️</button></div>
       </div>`;
   }
   const moveSafetyBox = () => `<div class="safety">
@@ -1649,6 +1657,8 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     };
   }
 
+  // Tidy the address after a refresh.
+  if (/[?&]v=\d+/.test(location.search)) { try { history.replaceState(null, "", location.pathname); } catch (e) {} }
   applyLang();
   buildPlan();
   start();
