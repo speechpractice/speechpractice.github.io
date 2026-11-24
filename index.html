@@ -1191,18 +1191,28 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
   }
 
   // ---------- hand animations ----------
-  // A simple hand seen palm-on: each pose gives how far the fingers spread and curl and where
-  // the thumb tip is; whole-hand turns, moves and props are extra values in the pose.
-  const HWR = [100, 178];                                                   // wrist
-  const FB = [[79, 112], [93, 107], [107, 108], [121, 113]], FL = [38, 45, 42, 32], FA = [-13, -4, 4, 13];
-  function tipOf(i, curl, spread) {
-    const a = FA[i] * spread * Math.PI / 180, l = FL[i] * (1 - 0.72 * curl);
-    return [FB[i][0] + l * Math.sin(a), FB[i][1] - l * Math.cos(a)];
+  // A hand seen palm-on. Each finger has three joints that bend toward the viewer as it curls,
+  // so a curling finger shortens and then folds down over the palm, as a real one does. A pose
+  // gives how far the fingers spread and curl and where the thumb tip is; whole-hand turns,
+  // moves and props are extra values in the pose.
+  const HWR = [100, 180];                                                   // wrist
+  const FB = [[81, 106], [95, 101], [108, 102], [121, 108]], FL = [46, 52, 49, 38], FA = [-12, -4, 4, 12];
+  const FW = [12, 12.5, 12, 10.5], FSEG = [0.45, 0.31, 0.24], FBEND = [78, 98, 68];
+  function fingerPts(i, curl, spread) {
+    const a = FA[i] * spread * Math.PI / 180, dx = Math.sin(a), dy = -Math.cos(a), out = [FB[i]];
+    let th = 0;
+    for (let k = 0; k < 3; k++) {
+      th += curl * FBEND[k] * Math.PI / 180;
+      const l = FL[i] * FSEG[k] * Math.cos(th), q = out[k];
+      out.push([q[0] + dx * l, q[1] + dy * l]);
+    }
+    return out;
   }
-  const TBASE = [77, 154];
+  const tipOf = (i, curl, spread) => fingerPts(i, curl, spread)[3];
+  const TBASE = [84, 156];
   const HP = (spread, c, th, extra) => Object.assign({ rot: 0, sx: 1, sc: 1, dx: 0, dy: 0, spread, c, th }, extra || {});
-  const H_OPEN = HP(1, [0, 0, 0, 0], [46, 120]), H_FIST = HP(0.2, [1, 1, 1, 1], [97, 133]), H_REST = HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128]);
-  const touch = (i, extra) => { const c = [0.15, 0.15, 0.15, 0.15]; c[i] = 0.45; return HP(0.5, c, tipOf(i, 0.45, 0.5), extra); };
+  const H_OPEN = HP(1, [0, 0, 0, 0], [46, 122]), H_FIST = HP(0.2, [1, 1, 1, 1], [100, 130]), H_REST = HP(0.4, [0.12, 0.12, 0.12, 0.12], [55, 130]);
+  const touch = (i, extra) => { const c = [0.15, 0.15, 0.15, 0.15]; c[i] = 0.68; return HP(0.5, c, tipOf(i, 0.68, 0.5), extra); };
   const PINCH = (extra) => touch(0, extra);
   // Blend any two poses with the same shape (numbers, arrays and objects of numbers).
   const mixAny = (a, b, f) => typeof a === "number" ? a + (b - a) * f
@@ -1220,7 +1230,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
                alt: { dur: 700, table: false, cup: false, poses: [touch(0), H_OPEN, touch(1), H_OPEN, touch(2), H_OPEN, touch(3), H_OPEN] } },
     lift:    { dur: 1500, side: true, bottle: true, poses: [{ rot: 18 }, { rot: -32 }], alt: { dur: 1500, side: true, poses: [{ rot: 18 }, { rot: -32 }] } },
     write:   { dur: 3000, write: true, paper: true, poses: [{ t: 0 }, { t: 1 }, { t: 1 }], alt: { dur: 3000, write: true, poses: [{ t: 0 }, { t: 1 }, { t: 1 }] } },
-    calm:    { dur: 1600, breath: true, poses: [HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { rot: -5 }), HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { rot: 5 })] }
+    calm:    { dur: 1600, breath: true, bx: 168, poses: [HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { rot: -5 }), HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { rot: 5 })] }
   };
   // Uses the no-prop animation when the person has not ticked that prop.
   function handAnimFor(id) {
@@ -1229,46 +1239,71 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     return Object.assign({}, base, { alt: undefined, bottle: has && !!a.bottle, paper: has && !!a.paper, draw: handSVG, mix: mixAny });
   }
   const pts = (arr) => arr.map((q) => q[0].toFixed(1) + "," + q[1].toFixed(1)).join(" ");
+  // A rounded limb segment: a darker outline under a lighter fill, with a crease at each joint.
+  function limb(points, w) {
+    const P = pts(points), cap = `stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+    let out = `<polyline points="${P}" stroke="var(--teal)" stroke-width="${w + 5}" ${cap}/><polyline points="${P}" stroke="var(--teal-soft)" stroke-width="${w}" ${cap}/>`;
+    for (let k = 1; k < points.length - 1; k++) {
+      const a = points[k - 1], b = points[k + 1], vx = b[0] - a[0], vy = b[1] - a[1], n = Math.hypot(vx, vy);
+      if (n < 3) continue;
+      const ux = -vy / n * w * 0.32, uy = vx / n * w * 0.32, q = points[k];
+      out += `<line x1="${(q[0] - ux).toFixed(1)}" y1="${(q[1] - uy).toFixed(1)}" x2="${(q[0] + ux).toFixed(1)}" y2="${(q[1] + uy).toFixed(1)}" stroke="var(--teal)" stroke-width="1.6" stroke-linecap="round" opacity=".45"/>`;
+    }
+    return out;
+  }
+  const coinSVG = (cx, cy, ry) => `<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="8" ry="${ry.toFixed(1)}" fill="var(--marigold)" stroke="#9a6a12" stroke-width="1.5"/>`
+    + (ry > 3 ? `<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="5" ry="${(ry * 0.62).toFixed(1)}" fill="none" stroke="#9a6a12" stroke-width="1" opacity=".6"/>` : "");
   function handSVG(spec, p) {
     if (spec.side) return sideHandSVG(spec, p);
     if (spec.write) return writeSVG(spec, p);
     let out = "";
     if (spec.table) out += `<line x1="15" y1="188" x2="185" y2="188" stroke="var(--line)" stroke-width="3" stroke-linecap="round"/>`
-      + [[38, 185], [52, 186], [66, 185]].map((c) => `<ellipse cx="${c[0]}" cy="${c[1]}" rx="6" ry="2.5" fill="var(--marigold)"/>`).join("");
-    const stroke = `stroke="var(--teal)" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
-    let g = `<rect x="85" y="168" width="30" height="60" rx="10" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="4"/>`
-      + `<rect x="70" y="104" width="60" height="72" rx="18" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="5"/>`;
-    if (p.ball) g += `<circle cx="100" cy="140" r="${p.ball.toFixed(1)}" fill="var(--marigold)" opacity=".9"/>`;
-    for (let i = 0; i < 4; i++) g += `<polyline points="${pts([FB[i], tipOf(i, p.c[i], p.spread)])}" ${stroke} stroke-width="12"/>`;
-    const th = p.th, mid = [(TBASE[0] + th[0]) / 2 - 9, (TBASE[1] + th[1]) / 2 + 5];
-    g += `<polyline points="${pts([TBASE, mid, th])}" ${stroke} stroke-width="13"/>`;
+      + [[36, 185], [50, 186], [64, 185]].map((c) => coinSVG(c[0], c[1], 2.5)).join("");
+    // forearm, palm with its lines and the pad at the base of the thumb
+    let g = `<path d="M87 178 L83 232 L121 232 L117 178 Z" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="4" stroke-linejoin="round"/>`
+      + `<path d="M87 180 C 75 170 69 148 71 124 C 72 110 76 102 84 100 C 98 96 112 96 123 102 C 131 106 134 114 133 124 C 132 146 128 166 117 180 Z" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="4.5" stroke-linejoin="round"/>`
+      + `<g fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" opacity=".3"><path d="M86 122 Q 106 114 129 123"/><path d="M79 133 Q 97 129 117 142"/><path d="M88 114 Q 76 142 93 172"/></g>`;
+    if (p.ball) g += `<circle cx="101" cy="140" r="${p.ball.toFixed(1)}" fill="var(--marigold)" stroke="#9a6a12" stroke-width="1.5"/>`
+      + `<path d="M${(101 - p.ball * 0.8).toFixed(1)} ${(140 - p.ball * 0.5).toFixed(1)} Q 101 140 ${(101 + p.ball * 0.8).toFixed(1)} ${(140 - p.ball * 0.5).toFixed(1)}" fill="none" stroke="var(--surface)" stroke-width="2" opacity=".8"/>`
+      + `<circle cx="${(101 - p.ball * 0.35).toFixed(1)}" cy="${(140 - p.ball * 0.4).toFixed(1)}" r="${(p.ball * 0.18).toFixed(1)}" fill="var(--surface)" opacity=".6"/>`;
+    for (let i = 3; i >= 0; i--) g += limb(fingerPts(i, p.c[i], p.spread), FW[i]);
+    const th = p.th, [kn] = ik(TBASE, th, 31, 28, -1);
+    g += limb([TBASE, kn, th], 14);
     if (p.coin || (p.hold !== undefined && p.hold > 0.5)) {
-      const ix = tipOf(0, p.c[0], p.spread), cx = (ix[0] + th[0]) / 2, cy = (ix[1] + th[1]) / 2;
-      const ry = Math.max(1.5, 8 * Math.abs(Math.cos((p.flip || 0) * Math.PI)));
-      g += `<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="8" ry="${ry.toFixed(1)}" fill="var(--marigold)" stroke="var(--ink)" stroke-width="1"/>`;
+      const ix = tipOf(0, p.c[0], p.spread);
+      g += coinSVG((ix[0] + th[0]) / 2, (ix[1] + th[1]) / 2, Math.max(1.5, 8 * Math.abs(Math.cos((p.flip || 0) * Math.PI))));
     }
     out += `<g transform="translate(${p.dx.toFixed(1)} ${p.dy.toFixed(1)}) translate(${HWR[0]} ${HWR[1]}) rotate(${p.rot.toFixed(1)}) scale(${(p.sx * p.sc).toFixed(3)} ${p.sc.toFixed(3)}) translate(${-HWR[0]} ${-HWR[1]})">${g}</g>`;
-    if (spec.cup) out += `<path d="M132 150 L136 188 L164 188 L168 150 Z" fill="var(--surface)" stroke="var(--teal)" stroke-width="4" stroke-linejoin="round"/>`;
+    if (spec.cup) out += `<path d="M132 148 L137 188 L163 188 L168 148" fill="var(--surface)" stroke="var(--teal)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="150" cy="148" rx="18" ry="4" fill="none" stroke="var(--teal)" stroke-width="3"/>`;
     return out;
   }
-  // Seen from the side: forearm resting on a table, hand over the edge, bending at the wrist.
+  // Seen from the side: forearm resting on a table, hand over the edge, bending at the wrist,
+  // with the fingers wrapped round a small bottle (or closed in a loose fist).
   function sideHandSVG(spec, p) {
-    let out = `<rect x="10" y="140" width="96" height="50" rx="4" fill="var(--line)" opacity=".6"/>`
-      + `<rect x="22" y="118" width="84" height="22" rx="10" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="5"/>`;
-    let g = `<rect x="100" y="117" width="38" height="24" rx="10" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="5"/>`;
-    if (spec.bottle) g += `<rect x="136" y="96" width="16" height="64" rx="6" fill="var(--marigold)" opacity=".9"/>`;
-    g += `<path d="M136 120 q 16 0 16 12 q 0 12 -16 12" fill="none" stroke="var(--teal)" stroke-width="10" stroke-linecap="round"/>`;
-    out += `<g transform="rotate(${p.rot.toFixed(1)} 104 129)">${g}</g>`;
+    let out = `<rect x="8" y="144" width="100" height="46" rx="4" fill="var(--line)" opacity=".55"/><line x1="8" y1="144" x2="108" y2="144" stroke="var(--line)" stroke-width="3"/>`
+      + `<path d="M20 120 Q 60 116 104 121 L 104 143 Q 60 145 20 143 Z" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="4.5" stroke-linejoin="round"/>`;
+    let g = `<path d="M102 121 Q 122 117 136 121 Q 142 132 136 143 Q 120 146 102 143 Z" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="4.5" stroke-linejoin="round"/>`;
+    if (spec.bottle) g += `<rect x="140" y="92" width="20" height="72" rx="7" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="3"/>`
+      + `<rect x="144" y="84" width="12" height="10" rx="2" fill="var(--marigold)" stroke="#9a6a12" stroke-width="1.5"/><rect x="140" y="128" width="20" height="16" fill="var(--marigold)" opacity=".8"/>`;
+    const fx = spec.bottle ? 150 : 141;
+    [117, 125, 133, 141].forEach((y, i) => { g += limb([[134, y + (i - 1.5) * 1.5], [fx, y], [fx + 4, y + 4]], 7); });
+    g += limb([[110, 121], [128, 113], [fx - 2, 112]], 8);
+    out += `<g transform="rotate(${p.rot.toFixed(1)} 104 132)">${g}</g>`;
     return out;
   }
-  // Big loops drawn across the page, then started again.
+  // Big loops drawn across the page by a hand holding a pen (or a finger tracing in the air).
   const LOOP = Array.from({ length: 121 }, (_, i) => { const t = i / 120 * 7 * Math.PI; return [28 + t * 6.2 - 9 * Math.sin(t), 118 - 26 * Math.cos(t)]; });
   function writeSVG(spec, p) {
-    const n = Math.max(1, Math.round(p.t * (LOOP.length - 1))), tip = LOOP[n];
+    const n = Math.max(1, Math.round(p.t * (LOOP.length - 1))), tip = LOOP[n], [x, y] = tip;
     let out = spec.paper ? `<rect x="14" y="62" width="172" height="104" rx="6" fill="var(--surface)" stroke="var(--line)" stroke-width="3"/>` : "";
     out += `<polyline points="${pts(LOOP.slice(0, n + 1))}" fill="none" stroke="var(--teal)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" ${spec.paper ? "" : 'stroke-dasharray="2 6"'}/>`;
-    out += spec.paper ? `<line x1="${tip[0].toFixed(1)}" y1="${tip[1].toFixed(1)}" x2="${(tip[0] + 16).toFixed(1)}" y2="${(tip[1] - 34).toFixed(1)}" stroke="var(--ink)" stroke-width="6" stroke-linecap="round"/>`
-                      : `<circle cx="${tip[0].toFixed(1)}" cy="${tip[1].toFixed(1)}" r="6" fill="var(--teal)"/>`;
+    const palm = `<ellipse cx="${x + 30}" cy="${y - 34}" rx="17" ry="13" transform="rotate(-30 ${x + 30} ${y - 34})" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="4"/>`;
+    if (spec.paper) {
+      out += `<line x1="${x}" y1="${y}" x2="${x + 22}" y2="${y - 52}" stroke="var(--ink)" stroke-width="6" stroke-linecap="round"/><circle cx="${x}" cy="${y}" r="2.5" fill="var(--ink)"/>`
+        + palm + limb([[x + 22, y - 30], [x + 12, y - 24], [x + 6, y - 14]], 7) + limb([[x + 18, y - 40], [x + 8, y - 30], [x + 5, y - 19]], 7);
+    } else {
+      out += palm + limb([[x + 18, y - 26], [x + 8, y - 12], [x, y]], 7) + limb([[x + 22, y - 32], [x + 12, y - 30], [x + 10, y - 24]], 7);
+    }
     return out;
   }
 
@@ -1409,7 +1444,8 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       let svg = (spec.draw || figureSVG)(spec, p);
       if (spec.breath) {
         const k = (1 - Math.cos((Math.max(0, now - t0) / 10000) * Math.PI * 2)) / 2; // 4 in, 6 out is close to a 10 s cycle
-        svg += `<circle cx="160" cy="60" r="${(10 + 14 * k).toFixed(1)}" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="2"/><text x="160" y="96" text-anchor="middle" font-size="11" fill="var(--muted)">${k > 0.5 ? "breathe in" : "breathe out"}</text>`;
+        const bx = spec.bx || 160;
+        svg += `<circle cx="${bx}" cy="60" r="${(10 + 14 * k).toFixed(1)}" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="2"/><text x="${bx}" y="96" text-anchor="middle" font-size="11" fill="var(--muted)">${k > 0.5 ? "breathe in" : "breathe out"}</text>`;
       }
       el.innerHTML = svg;
       if (!reduce) animRaf = requestAnimationFrame(draw);
