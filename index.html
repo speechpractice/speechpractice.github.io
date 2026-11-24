@@ -1224,7 +1224,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     wrist:   { dur: 1100, poses: [H_REST, HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { sx: -1 }), H_REST, HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { rot: -22 }), HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { rot: 22 })] },
     squeeze: { dur: 1500, poses: [HP(0.3, [0.5, 0.5, 0.5, 0.5], [70, 132], { ball: 20 }), HP(0.2, [0.8, 0.8, 0.8, 0.8], [88, 134], { ball: 17 })],
                alt: { dur: 1500, poses: [H_OPEN, H_FIST, H_FIST] } },
-    coins:   { dur: 900, poses: [PINCH({ coin: 1, flip: 0 }), PINCH({ coin: 1, flip: 1 })],
+    coins:   { dur: 1400, coinClose: true, poses: [{ flip: 0 }, { flip: 0.5 }, { flip: 1 }, { flip: 1 }],
                alt: { dur: 650, poses: [touch(0), touch(1), touch(2), touch(3)] } },
     pickup:  { dur: 900, table: true, cup: true, poses: [PINCH({ sc: 0.6, rot: 180, dx: -45, dy: -33, hold: 0 }), PINCH({ sc: 0.6, rot: 180, dx: -45, dy: -33, hold: 1 }), PINCH({ sc: 0.6, rot: 180, dx: -10, dy: -75, hold: 1 }), PINCH({ sc: 0.6, rot: 180, dx: 42, dy: -70, hold: 1 }), PINCH({ sc: 0.6, rot: 180, dx: 42, dy: -70, hold: 0 })],
                alt: { dur: 700, table: false, cup: false, poses: [touch(0), H_OPEN, touch(1), H_OPEN, touch(2), H_OPEN, touch(3), H_OPEN] } },
@@ -1256,6 +1256,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
   function handSVG(spec, p) {
     if (spec.side) return sideHandSVG(spec, p);
     if (spec.write) return writeSVG(spec, p);
+    if (spec.coinClose) return coinCloseSVG(p);
     let out = "";
     if (spec.table) out += `<line x1="15" y1="188" x2="185" y2="188" stroke="var(--line)" stroke-width="3" stroke-linecap="round"/>`
       + [[36, 185], [50, 186], [64, 185]].map((c) => coinSVG(c[0], c[1], 2.5)).join("");
@@ -1275,6 +1276,24 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     }
     out += `<g transform="translate(${p.dx.toFixed(1)} ${p.dy.toFixed(1)}) translate(${HWR[0]} ${HWR[1]}) rotate(${p.rot.toFixed(1)}) scale(${(p.sx * p.sc).toFixed(3)} ${p.sc.toFixed(3)}) translate(${-HWR[0]} ${-HWR[1]})">${g}</g>`;
     if (spec.cup) out += `<path d="M132 148 L137 188 L163 188 L168 148" fill="var(--surface)" stroke="var(--teal)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="150" cy="148" rx="18" ry="4" fill="none" stroke="var(--teal)" stroke-width="3"/>`;
+    return out;
+  }
+  // Close-up of the fingertips turning a coin over: two fingers on its top edge, the thumb on
+  // its bottom edge. Heads shows a ring, tails a star, so each turn is easy to see.
+  function coinCloseSVG(p) {
+    const c = Math.cos(p.flip * Math.PI), ry = Math.max(4, 30 * Math.abs(c)), cx = 100, cy = 108;
+    const top = cy - ry, bot = cy + ry, roll = p.flip * 10;
+    let out = `<path d="M150 74 A 46 46 0 0 1 150 142" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 7"/>`
+      + `<path d="M143 136 L150 146 L158 135" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+    out += limb([[56, 8], [70, 52 - roll * 0.3], [cx - 12, top - 4]], 22) + limb([[112, 2], [118, 48 - roll * 0.3], [cx + 10, top - 5]], 22);
+    // coin: the rim thickness shows while it is edge-on
+    out += `<ellipse cx="${cx}" cy="${cy + 3}" rx="30" ry="${ry.toFixed(1)}" fill="#9a6a12"/>`
+      + `<ellipse cx="${cx}" cy="${cy}" rx="30" ry="${ry.toFixed(1)}" fill="var(--marigold)" stroke="#9a6a12" stroke-width="2"/>`;
+    if (ry > 10) out += c > 0
+      ? `<ellipse cx="${cx}" cy="${cy}" rx="19" ry="${(ry * 0.63).toFixed(1)}" fill="none" stroke="#9a6a12" stroke-width="2.5"/>`
+      : `<path transform="translate(${cx} ${cy}) scale(1 ${(ry / 30).toFixed(3)})" d="M0 -16 L4.7 -6.5 L15.2 -4.9 L7.6 2.5 L9.4 12.9 L0 8 L-9.4 12.9 L-7.6 2.5 L-15.2 -4.9 L-4.7 -6.5 Z" fill="#9a6a12" opacity=".85"/>`;
+    out += limb([[4, 166], [52, 152 + roll * 0.4], [cx - 4, bot + 6]], 26);
+    out += `<text x="100" y="194" text-anchor="middle" font-size="12" fill="var(--muted)">turn it over, and over</text>`;
     return out;
   }
   // Seen from the side: forearm resting on a table, hand over the edge, bending at the wrist,
