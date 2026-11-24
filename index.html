@@ -157,6 +157,10 @@ select { font-size: .9rem; text-overflow: ellipsis; }
 .tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; background: var(--teal-soft); padding: 6px; border-radius: 16px; }
 .tab { min-height: 56px; padding: 0 4px; background: transparent; color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 1rem; white-space: nowrap; border-radius: 12px; }
 .tab.on { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.seg button { display: flex; flex-direction: column; align-items: center; gap: 2px; font: 600 1rem var(--display); padding: 10px 4px; min-height: 64px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.seg button span { font-size: 1.5rem; }
+.seg button.on { border-color: var(--teal); background: var(--teal-soft); }
 .props { display: flex; flex-direction: column; gap: 8px; }
 .prop { text-align: left; font: 600 1rem var(--display); padding: 12px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); min-height: 52px; cursor: pointer; }
 .prop.on { border-color: var(--teal); background: var(--teal-soft); }
@@ -702,7 +706,11 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
   // the default and standing is offered only with someone nearby.
   const fallRisk = () => !!(S.moveCheck && S.moveCheck.answers && S.moveCheck.answers[3]);
   const hasStand = (id) => MOVES[id].stand !== MOVES[id].seat && !!(ANIM[id] && ANIM[id].stand);
-  const defaultVer = (st) => !hasStand(st.id) ? "seat" : !S.seated ? "stand" : fallRisk() ? "seat" : st.mix ? "stand" : "seat";
+  // Move mode: "stand", "seat" or "mix" (both). A "yes" to falls or unsteadiness keeps it seated
+  // until the safety questions are answered again.
+  const MODE_LABEL = { stand: "standing with support", seat: "seated routine", mix: "seated and standing mix" };
+  const moveMode = () => fallRisk() ? "seat" : (S.moveMode || (S.seated ? "mix" : "stand"));
+  const defaultVer = (st) => !hasStand(st.id) ? "seat" : moveMode() === "stand" ? "stand" : moveMode() === "seat" ? "seat" : st.mix ? "stand" : "seat";
   const moveVers = () => { const tdy = today(); tdy.moveVer = tdy.moveVer || {}; return tdy.moveVer; };
   const moveProg = () => { const tdy = today(); tdy.moveProg = tdy.moveProg || {}; return tdy.moveProg; };
   const moveStepDone = (st) => moved()[st.id] || (moveProg()[st.id] || 0) > st.r;
@@ -788,8 +796,15 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         <button class="btn btn-primary" id="mv-unlock" disabled>Continue</button>
         <button class="btn btn-ghost" id="mv-redo">Answer the questions again</button>
       </div>` : `<div class="card">
+        <h2>How do you want to exercise today?</h2>
+        <div class="seg" role="group" aria-label="Exercise position">
+          ${[["stand", "🧍", "Standing"], ["seat", "🪑", "Seated"], ["mix", "🔀", "Both"]].map(([v, ic, l]) => `<button data-mode="${v}" class="${moveMode() === v ? "on" : ""}" aria-pressed="${moveMode() === v}"><span aria-hidden="true">${ic}</span>${l}</button>`).join("")}
+        </div>
+        <p class="note">${fallRisk() ? "Seated, because of your answer about falls or unsteadiness. Tap Standing or Both to answer the safety questions again." : moveMode() === "stand" ? "Hold a sturdy chair or counter for support." : moveMode() === "seat" ? "Every exercise done sitting in a sturdy chair." : "Exercises alternate between seated and standing, so each one is done both ways."}</p>
+      </div>
+      <div class="card">
         <div><h2>${doneCount === plan.steps.length ? "All movement done today. Well done!" : "Today's movement"}</h2>
-        <p class="muted">${doneCount} of ${plan.steps.length} done · about ${moveMinutes()} minutes · ${!S.seated ? "standing with support" : fallRisk() ? "seated routine" : "seated and standing mix"}${moveRounds() > 1 ? ` · main exercises ${moveRounds() === 2 ? "twice" : moveRounds() + " times"}, as a circuit` : ""}</p>
+        <p class="muted">${doneCount} of ${plan.steps.length} done · about ${moveMinutes()} minutes · ${MODE_LABEL[moveMode()]}${moveRounds() > 1 ? ` · main exercises ${moveRounds() === 2 ? "twice" : moveRounds() + " times"}, as a circuit` : ""}</p>
         ${!S.moveRounds && moveRounds() < roundRange()[1] ? `<p class="note">Builds to ${roundRange()[1]} rounds after ${BUILD_DAYS} full days of movement (${fullMoveDays()} so far in the last 2 weeks).</p>` : ""}</div>
         ${next ? `<button class="btn btn-primary btn-big pulse" id="mv-go">${doneCount || Object.keys(moveProg()).length ? t("cont") : t("start")}: ${MOVES[next].name}</button>`
                : `<button class="btn btn-ghost" id="mv-again">Do the routine again</button>`}
@@ -798,7 +813,6 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
             <span class="chk" aria-hidden="true">${done[id] ? "✓" : ""}</span>
             <span class="t"><b>${MOVES[id].name}</b><small>${MOVES[id].short}${!done[id] && moveProg()[id] ? ` · ${moveProg()[id]}/${moveRounds()} rounds` : ""}</small></span></button></li>`).join("")}
         </ul>
-        <button class="btn btn-ghost" id="mv-mode">${!S.seated ? "Switch to the seated routine" : fallRisk() ? "Seated routine is on" : "Seated and standing mix is on"}</button>
       </div>
       <div class="card">
         <h2>Progress</h2>
@@ -823,10 +837,12 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     }
     const g = app.querySelector("#mv-go"); if (g) g.onclick = () => startMove();
     const a = app.querySelector("#mv-again"); if (a) a.onclick = () => startMove(null, true);
-    app.querySelector("#mv-mode").onclick = () => {
-      if (S.seated && S.moveCheck.answers[3]) { moveCheck(); return; }
-      S.seated = !S.seated; save(); moveHome();
-    };
+    app.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => {
+      const v = b.dataset.mode;
+      if (v === moveMode()) return;
+      if (fallRisk()) { moveCheck(); return; }
+      S.moveMode = v; S.seated = v !== "stand"; save(); moveHome();
+    });
     app.querySelectorAll("[data-mv]").forEach((b) => b.onclick = () => startMove(b.dataset.mv));
   }
 
@@ -852,7 +868,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     done.onclick = () => {
       if (ans.some((x) => x === null)) return;
       S.moveCheck = { answers: ans, date: new Date().toISOString(), cleared: "" };
-      if (ans[3]) S.seated = true;
+      if (ans[3]) { S.seated = true; S.moveMode = "seat"; }
       save(); track("move-check"); moveHome();
     };
   }
@@ -871,7 +887,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       <div class="card">
         <h1>${m.name}</h1>
         ${hasStand(id) ? `<div class="ver" role="group" aria-label="Version">${verBtn("seat", "🪑 Seated")}${verBtn("stand", "🧍 Standing")}</div>` : ""}
-        ${ver === "stand" && S.seated && fallRisk() ? `<p class="note">Only with someone beside you, holding a sturdy chair or counter.</p>` : ""}
+        ${ver === "stand" && fallRisk() ? `<p class="note">Only with someone beside you, holding a sturdy chair or counter.</p>` : ""}
         <svg class="anim" id="mv-anim" viewBox="0 0 200 200" role="img" aria-label="${esc(m.name)}: animated example"></svg>
         <p style="font-size:1.15rem">${esc(how)}</p>
         <div class="timer" id="mv-clock">${m.type === "time" ? fmtSecs(m.secs) : m.reps + "<small> times</small>"}</div>
@@ -900,7 +916,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       }
       // Offer the other version too, so people can do both or just one.
       const other = ver === "seat" ? "stand" : "seat";
-      const also = did && hasStand(id) && !(moveVers()[id] || {})[other] && !(other === "stand" && S.seated && fallRisk()) ? { k: mSession.k, ver: other } : null;
+      const also = did && hasStand(id) && !(moveVers()[id] || {})[other] && !(other === "stand" && fallRisk()) ? { k: mSession.k, ver: other } : null;
       const label = moveNextLabel();
       do { mSession.k++; } while (mSession.k < mSession.steps.length && moveStepDone(mSession.steps[mSession.k]));
       if (mSession.k < mSession.steps.length) return moveRest(label, also);
@@ -1950,7 +1966,12 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
         <label for="s-name">${t("nameLabel")}<input id="s-name" value="${esc(S.name)}"></label>
         <label class="check-row" for="s-coach"><input type="checkbox" id="s-coach"> Spoken encouragement and coach tips, in your practice language when this phone has a voice for it (worked out on this phone)</label>
         ${COACH_URL ? `<label class="check-row" for="s-ai"><input type="checkbox" id="s-ai"> Optional: AI-written encouragement (needs internet). Sends only your practice language, voice or movement, and how loud the round was. No name, recording or health details.</label>` : ""}
-        <label class="check-row" for="s-seated"><input type="checkbox" id="s-seated"> Seated exercise routine (Move)</label>
+        <label for="s-movemode">Move routine
+          <select id="s-movemode">
+            <option value="stand">🧍 Standing (holding a chair)</option>
+            <option value="seat">🪑 Seated</option>
+            <option value="mix">🔀 Both: seated and standing mixed</option>
+          </select></label>
         <label for="s-rounds">Move rounds (the main exercises as a circuit: A B C D, then again)
           <select id="s-rounds">
             <option value="0">Automatic (recommended): starts gentle and builds up</option>
@@ -2006,7 +2027,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     sp.onchange = syncEnglish; syncEnglish();
     app.querySelector("#s-script").value = S.script;
     app.querySelector("#s-cond").value = S.condition;
-    app.querySelector("#s-seated").checked = !!S.seated;
+    app.querySelector("#s-movemode").value = moveMode();
     app.querySelector("#s-rounds").value = String(S.moveRounds || 0);
     app.querySelector("#s-coach").checked = S.coach !== false;
     if (app.querySelector("#s-ai")) app.querySelector("#s-ai").checked = S.aiCheer === true;
@@ -2023,8 +2044,8 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       S.coach = app.querySelector("#s-coach").checked;
       if (app.querySelector("#s-ai")) { const on = app.querySelector("#s-ai").checked; if (on && !S.aiCheer) track("ai-cheer-on"); S.aiCheer = on; }
       S.moveRounds = +app.querySelector("#s-rounds").value || 0;
-      const wantSeated = app.querySelector("#s-seated").checked;
-      S.seated = wantSeated || !!(S.moveCheck && S.moveCheck.answers[3]);
+      const mode = fallRisk() ? "seat" : app.querySelector("#s-movemode").value;
+      S.moveMode = mode; S.seated = mode !== "stand";
       S.phraseMode = app.querySelector("#s-phrases").value;
       S.mine = app.querySelector("#s-mine").value.split("\n").map((x) => x.trim()).filter(Boolean);
       save(); home();

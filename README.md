@@ -33,7 +33,8 @@ The app has three sections, switched with tabs at the top.
   knee straightening, side steps, supported balance, punches, a steady walk, stretches and
   calm breathing. Each one has a **seated** version and a **standing** version done holding a
   sturdy chair or counter.
-- **Seated and standing mix.** With the seated routine on, the main exercises alternate between
+- **Standing, Seated or Both.** Three buttons at the top of the Move tab choose the routine.
+  With Both, the main exercises alternate between
   the seated and the supported standing version, so over two rounds each one is done both ways.
   Every exercise page has a Seated / Standing switch, and each version gets its own ✓ once
   done today. After a "yes" to falls or unsteadiness, seated stays the default, and standing
