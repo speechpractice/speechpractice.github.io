@@ -1061,6 +1061,11 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     const needed = [...new Set(plan.steps.map((id) => HANDS[id].prop).filter(Boolean))];
     app.innerHTML = `${header()}${tabs("hands")}
       <div class="card">
+        <h2>Before you start: anything nearby?</h2>
+        <p class="muted">Optional. Tap what you have. Without them, each exercise has a version that needs nothing.</p>
+        <div class="props">${needed.map((k) => `<button class="prop ${props[k] ? "on" : ""}" data-prop="${k}" aria-pressed="${!!props[k]}">${props[k] ? "✓ " : ""}${PROPS[k]}</button>`).join("")}</div>
+      </div>
+      <div class="card">
         <div><h2>${doneCount === plan.steps.length ? "All hand practice done today. Well done!" : "Today's hand practice"}</h2>
         <p class="muted">${doneCount} of ${plan.steps.length} done · about ${handMinutes()} minutes · sitting at a table${handRounds() > 1 ? " · main exercises twice, as a circuit" : ""}</p></div>
         ${next ? `<button class="btn btn-primary btn-big pulse" id="hd-go">${doneCount || Object.keys(handProg()).length ? t("cont") : t("start")}: ${HANDS[next].name}</button>`
@@ -1070,11 +1075,6 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
             <span class="chk" aria-hidden="true">${done[id] ? "✓" : ""}</span>
             <span class="t"><b>${HANDS[id].name}</b><small>${HANDS[id].short}${!done[id] && handProg()[id] ? ` · ${handProg()[id]}/${handRounds()} rounds` : ""}</small></span></button></li>`).join("")}
         </ul>
-      </div>
-      <div class="card">
-        <h2>Anything nearby?</h2>
-        <p class="muted">Optional. Tap what you have. Without them, each exercise has a version that needs nothing.</p>
-        <div class="props">${needed.map((k) => `<button class="prop ${props[k] ? "on" : ""}" data-prop="${k}" aria-pressed="${!!props[k]}">${props[k] ? "✓ " : ""}${PROPS[k]}</button>`).join("")}</div>
       </div>
       <div class="card">
         <h2>Progress</h2>
