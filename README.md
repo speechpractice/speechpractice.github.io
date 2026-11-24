@@ -10,7 +10,7 @@ It started as an app for my mom. It's free for anyone who can use it.
 
 ## What it does
 
-The app has two sections, switched with tabs at the top.
+The app has three sections, switched with tabs at the top.
 
 ### 🏃 Move
 
@@ -49,6 +49,23 @@ The app has two sections, switched with tabs at the top.
   cool sessions, steady pace, or strength and balance), drawing on published guidance such as
   the Parkinson's Foundation/ACSM exercise recommendations and the WHO 2020 guidelines for
   older adults.
+
+### ✋ Hands
+
+- Hand control and finger-skill practice, done sitting at a table, in the same one-tap circuit
+  as Move: a warm-up, the main exercises twice (once in the short-session style), then a calm
+  finish, each with a looping hand animation and a ✓ when done.
+- Exercises: open wide and close tight, thumb to fingertips, wrist turns, squeeze and hold, coin
+  turns, pick up and drop in, light wrist lifts, write big, and shake out and breathe. Each
+  practice style gets its own selection.
+- **Props are optional.** A soft ball (or rolled-up socks), a few coins and a cup, a small water
+  bottle, and paper and a thick pen. People tick what they have; every exercise has a version
+  that needs nothing.
+- **What it can and cannot do.** A home dexterity programme improved fine motor skills in
+  Parkinson's (Vanbellingen et al. 2017), and small studies suggest light strength training can
+  help steadiness in essential tremor. Exercise has not been shown to stop tremor itself, so the
+  app presents this as practice for hand control, not a tremor treatment. Everyday tips (forearm
+  support, two-handed cups, heavier utensils, calm breathing) are shown alongside.
 
 ### 🗣️ Speak
 

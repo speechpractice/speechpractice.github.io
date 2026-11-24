@@ -154,9 +154,12 @@ select { font-size: .9rem; text-overflow: ellipsis; }
 .coach.warn { color: var(--warn); }
 .coach.good { color: var(--good); }
 .cheer-sub { display: block; font-size: .85rem; font-weight: 500; color: var(--muted); margin-top: 2px; }
-.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--teal-soft); padding: 6px; border-radius: 16px; }
-.tab { min-height: 56px; background: transparent; color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 1.05rem; border-radius: 12px; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; background: var(--teal-soft); padding: 6px; border-radius: 16px; }
+.tab { min-height: 56px; padding: 0 4px; background: transparent; color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 1rem; white-space: nowrap; border-radius: 12px; }
 .tab.on { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.props { display: flex; flex-direction: column; gap: 8px; }
+.prop { text-align: left; font: 600 1rem var(--display); padding: 12px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); min-height: 52px; cursor: pointer; }
+.prop.on { border-color: var(--teal); background: var(--teal-soft); }
 .q { display: flex; flex-direction: column; gap: 8px; padding-block: 6px; border-top: 1px solid var(--line); }
 .yn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .yn .btn { min-height: 52px; }
@@ -556,6 +559,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
   function home() {
     stopTimer(); current = null;
     if (S.tab === "move") return moveHome();
+    if (S.tab === "hands") return handsHome();
     const tdy = today();
     const doneCount = EX.filter((e) => tdy.done[e.id]).length;
     const next = EX.find((e) => !tdy.done[e.id]);
@@ -742,6 +746,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     return `<div class="tabs" role="tablist">
       <button role="tab" class="tab ${active === "speak" ? "on" : ""}" id="tab-speak" aria-selected="${active === "speak"}">🗣️ Speak</button>
       <button role="tab" class="tab ${active === "move" ? "on" : ""}" id="tab-move" aria-selected="${active === "move"}">🏃 Move</button>
+      <button role="tab" class="tab ${active === "hands" ? "on" : ""}" id="tab-hands" aria-selected="${active === "hands"}">✋ Hands</button>
     </div>`;
   }
   // Loads the newest version of the app. Settings and progress are kept: they live in this
@@ -755,6 +760,7 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     const r = app.querySelector("#refresh"); if (r) r.onclick = refreshApp;
     app.querySelector("#tab-speak").onclick = () => { S.tab = "speak"; save(); home(); };
     app.querySelector("#tab-move").onclick = () => { S.tab = "move"; save(); home(); };
+    app.querySelector("#tab-hands").onclick = () => { S.tab = "hands"; save(); home(); };
   }
   function header() {
     return `<div class="top">
@@ -948,6 +954,324 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
     speak("All movement done today. Wonderful work.");
     app.querySelector("#mv-home").onclick = home;
   }
+  // ---------- Hands: control and finger skills ----------
+  // Practice for steadier, more controlled hand use and finer finger skills. Exercise has not
+  // been shown to stop tremor itself, so the app does not promise that. Drawn from a home
+  // dexterity programme that improved fine motor skills in Parkinson's (Vanbellingen 2017; the
+  // gains faded when practice stopped), small studies of light strength training in essential
+  // tremor (Sequeira 2012, Kavanagh 2016), and common occupational therapy advice: large
+  // deliberate movements, a supported forearm, and calm breathing.
+  const PROPS = { ball: "🎾 Soft ball or rolled-up socks", coins: "🪙 A few coins and a cup", bottle: "🧴 Small water bottle", paper: "✏️ Paper and a thick pen" };
+  const HANDS = {
+    open:    { name: "Open wide, close tight", short: "Warm up the hands", type: "reps", reps: 10,
+               text: "Rest your forearms on a table. Spread your fingers as wide as you can, then make a firm fist. Both hands together.",
+               tip: "Make each movement big and deliberate." },
+    thumbs:  { name: "Thumb to fingertips", short: "Finger control", type: "reps", reps: 5,
+               text: "Touch your thumb to each fingertip in turn, from the first finger to the little finger and back. Then the other hand.",
+               tip: "Slow and accurate beats fast." },
+    wrist:   { name: "Wrist turns", short: "Wrist movement", type: "reps", reps: 10,
+               text: "Rest your forearm on a table. Turn your palm up, then down. Then wave your hand slowly side to side. Then the other hand.",
+               tip: "Keep your elbow still and close to your side." },
+    squeeze: { name: "Squeeze and hold", short: "Grip strength", type: "reps", reps: 10, prop: "ball",
+               text: "Hold a soft ball or rolled-up socks. Squeeze firmly for 3 seconds, then relax. Then the other hand.",
+               alt: "Make a firm fist and hold it for 3 seconds, then relax and spread your fingers. Then the other hand.",
+               tip: "Breathe out as you squeeze." },
+    coins:   { name: "Coin turns", short: "Fingertip skill", type: "time", secs: 60, prop: "coins",
+               text: "Hold a coin between your thumb and first two fingers. Turn it over and over without putting it down. Switch hands halfway.",
+               alt: "Rub your thumb slowly across each fingertip in turn, as if feeling a piece of cloth. Switch hands halfway.",
+               tip: "If the coin drops, smile and pick it up. That is practice too." },
+    pickup:  { name: "Pick up and drop in", short: "Precise pinching", type: "reps", reps: 10, prop: "coins",
+               text: "Spread a few coins on the table. Pick them up one at a time between your thumb and first finger, and drop each one into a cup. Then the other hand.",
+               alt: "Pinch your thumb and first finger together firmly, then open wide. Then your thumb and middle finger, and so on. Then the other hand.",
+               tip: "Rest your forearm on the table to steady your hand." },
+    lift:    { name: "Light wrist lifts", short: "Forearm strength", type: "reps", reps: 10, prop: "bottle",
+               text: "Rest your forearm on a table with your hand over the edge, holding a small water bottle. Slowly lift your hand up, then lower it. Then the other hand.",
+               alt: "Rest your forearm on a table with your hand over the edge, and make a fist. Slowly lift your hand up, then lower it. Then the other hand.",
+               tip: "Go slowly on the way down too." },
+    write:   { name: "Write big", short: "Large, steady strokes", type: "time", secs: 90, prop: "paper",
+               text: "With a thick pen, draw big loops across the page. Then write your name in large letters, 3 times.",
+               alt: "With your finger, draw big loops in the air. Then write your name in large letters in the air, 3 times.",
+               tip: "Think big. Writing tends to shrink, so keep the letters large." },
+    calm:    { name: "Shake out and breathe", short: "Finish relaxed", type: "time", secs: 60,
+               text: "Gently shake your hands for a few seconds. Then rest them on your lap and breathe in slowly for 4 counts and out for 6.",
+               tip: "Hands often feel steadier when you are calm and rested." }
+  };
+  // Hand plan for each practice style: a warm-up, the main exercises as a circuit, and a calm finish.
+  const HAND_PLANS = {
+    pd:      { steps: ["open", "thumbs", "wrist", "squeeze", "coins", "pickup", "write", "calm"], tip: ["Think big.", "Make every movement large and clear. Many people find hand tasks easier when their medicine is working well."] },
+    stroke:  { steps: ["open", "thumbs", "wrist", "squeeze", "pickup", "lift", "calm"], tip: ["Both hands.", "Let your weaker hand do its share, and use your other hand to help it if you need to."] },
+    ms:      { steps: ["open", "thumbs", "squeeze", "pickup", "calm"], tip: ["Short and steady.", "Rest whenever you need, and stop before your hands get tired. Cool hands often feel steadier."] },
+    tbi:     { steps: ["open", "thumbs", "wrist", "coins", "pickup", "calm"], tip: ["Steady pace.", "Slow and accurate. Stop if you get a headache or feel dizzy."] },
+    aging:   { steps: ["open", "wrist", "squeeze", "lift", "coins", "write", "calm"], tip: ["Strong, nimble hands.", "Grip strength and fingertip skill help with jars, buttons and keys."] },
+    general: { steps: ["open", "thumbs", "wrist", "squeeze", "coins", "pickup", "lift", "write", "calm"], tip: ["A little every day.", "Hand skills fade when practice stops, so short daily practice works best."] }
+  };
+  const handPlan = () => HAND_PLANS[S.condition] || HAND_PLANS.pd;
+  const handRounds = () => S.condition === "ms" ? 1 : 2;
+  const hasProp = (h) => !h.prop || !!(S.props && S.props[h.prop]);
+  const handText = (h) => hasProp(h) ? h.text : h.alt;
+  const H_COOL = ["calm"];
+  function handSteps() {
+    const ids = handPlan().steps;
+    const warm = ids.slice(0, 1), cool = ids.filter((id) => H_COOL.includes(id)), main = ids.slice(1).filter((id) => !H_COOL.includes(id));
+    const R = handRounds(), steps = warm.map((id) => ({ id, r: 0, of: 1 }));
+    for (let r = 0; r < R; r++) main.forEach((id) => steps.push({ id, r, of: R }));
+    cool.forEach((id) => steps.push({ id, r: 0, of: 1 }));
+    return steps;
+  }
+  const handSecs = (h) => h.type === "time" ? h.secs : h.reps * 8;
+  const handMinutes = () => Math.max(3, Math.round(handSteps().reduce((a, st) => a + handSecs(HANDS[st.id]) + 15, 0) / 60));
+  const handDone = () => { const tdy = today(); tdy.hands = tdy.hands || {}; return tdy.hands; };
+  const handProg = () => { const tdy = today(); tdy.handProg = tdy.handProg || {}; return tdy.handProg; };
+  const handStepDone = (st) => handDone()[st.id] || (handProg()[st.id] || 0) > st.r;
+  function handWeek() { let n = 0; const d = new Date(); for (let i = 0; i < 7; i++) { const h = S.history[dayKey(d)]; if (h && h.hands && Object.keys(h.hands).length) n++; d.setDate(d.getDate() - 1); } return n; }
+  let hSession = null;
+  function startHands(fromId, redo) {
+    if (redo) { const tdy = today(); tdy.hands = {}; tdy.handProg = {}; save(); }
+    const steps = handSteps();
+    let k = fromId ? steps.findIndex((st) => st.id === fromId && !handStepDone(st)) : steps.findIndex((st) => !handStepDone(st));
+    if (fromId && k < 0) { delete handDone()[fromId]; handProg()[fromId] = 0; save(); k = steps.findIndex((st) => st.id === fromId); }
+    if (k < 0) { hSession = null; return handsHome(); }
+    hSession = { steps, k }; wake();
+    handRun();
+  }
+  function handNextLabel() {
+    let k = hSession.k + 1;
+    while (k < hSession.steps.length && handStepDone(hSession.steps[k])) k++;
+    const st = hSession.steps[k];
+    return st ? `${HANDS[st.id].name}${st.of > 1 ? ` · round ${st.r + 1} of ${st.of}` : ""}` : "";
+  }
+  function handStrip() {
+    const done = handDone(), p = handProg(), cur = hSession && hSession.steps[hSession.k] && hSession.steps[hSession.k].id;
+    return `<div class="strip" aria-label="Today's hand practice">${handPlan().steps.map((id) => {
+      const of = H_COOL.includes(id) || id === handPlan().steps[0] ? 1 : handRounds();
+      return `<span class="chip ${done[id] ? "done" : ""} ${id === cur ? "now" : ""}">${done[id] ? "✓ " : ""}${esc(HANDS[id].name)}${!done[id] && of > 1 && p[id] ? ` ${p[id]}/${of}` : ""}</span>`;
+    }).join("")}</div>`;
+  }
+  const handSafetyBox = () => `<div class="safety">
+      <p><b>About these exercises:</b> they practise hand control and finger skills. Exercise has not been shown to stop tremor itself. Stop if you feel pain, numbness or tingling. After a recent hand, wrist or arm injury or surgery, check with your doctor first. A new tremor, or one that gets worse quickly, needs a doctor's check.</p>
+      <p><b>${t("emergency")}</b></p>
+      <button class="linkish" id="about">${t("aboutLink")}</button>
+    </div>`;
+
+  function handsHome() {
+    const done = handDone(), plan = handPlan();
+    const doneCount = plan.steps.filter((id) => done[id]).length;
+    const next = plan.steps.find((id) => !done[id]);
+    const props = S.props || {};
+    const needed = [...new Set(plan.steps.map((id) => HANDS[id].prop).filter(Boolean))];
+    app.innerHTML = `${header()}${tabs("hands")}
+      <div class="card">
+        <div><h2>${doneCount === plan.steps.length ? "All hand practice done today. Well done!" : "Today's hand practice"}</h2>
+        <p class="muted">${doneCount} of ${plan.steps.length} done · about ${handMinutes()} minutes · sitting at a table${handRounds() > 1 ? " · main exercises twice, as a circuit" : ""}</p></div>
+        ${next ? `<button class="btn btn-primary btn-big pulse" id="hd-go">${doneCount || Object.keys(handProg()).length ? t("cont") : t("start")}: ${HANDS[next].name}</button>`
+               : `<button class="btn btn-ghost" id="hd-again">Do the routine again</button>`}
+        <ul class="ex-list">
+          ${plan.steps.map((id) => `<li><button class="ex-item ${done[id] ? "done" : ""}" data-hd="${id}">
+            <span class="chk" aria-hidden="true">${done[id] ? "✓" : ""}</span>
+            <span class="t"><b>${HANDS[id].name}</b><small>${HANDS[id].short}${!done[id] && handProg()[id] ? ` · ${handProg()[id]}/${handRounds()} rounds` : ""}</small></span></button></li>`).join("")}
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Anything nearby?</h2>
+        <p class="muted">Optional. Tap what you have. Without them, each exercise has a version that needs nothing.</p>
+        <div class="props">${needed.map((k) => `<button class="prop ${props[k] ? "on" : ""}" data-prop="${k}" aria-pressed="${!!props[k]}">${props[k] ? "✓ " : ""}${PROPS[k]}</button>`).join("")}</div>
+      </div>
+      <div class="card">
+        <h2>Progress</h2>
+        <div class="stats">
+          <div class="stat"><b>${handWeek()}/7</b><span>days this week</span></div>
+          <div class="stat"><b>${Object.keys(done).length}</b><span>exercises today</span></div>
+          <div class="stat"><b>${handMinutes()}</b><span>minutes in today's plan</span></div>
+        </div>
+      </div>
+      <div class="tip"><b>${esc(plan.tip[0])}</b> ${esc(plan.tip[1])}</div>
+      <div class="card">
+        <h3>Everyday tips for shaky hands</h3>
+        <ul class="about">
+          <li>Rest your forearm on a table, and keep your elbows close to your body.</li>
+          <li>Hold cups with both hands. A cup with a lid, or one only half full, spills less.</li>
+          <li>Heavier or thicker-handled spoons and pens can be easier to control. An occupational therapist can suggest the right ones.</li>
+          <li>Stress, tiredness and caffeine can make shaking worse. Slow breathing helps many people.</li>
+        </ul>
+      </div>
+      ${handSafetyBox()}
+      <p class="note" dir="ltr">© 2026 Speak &amp; Move · All rights reserved</p>`;
+    app.querySelector("#settings").onclick = settings;
+    app.querySelector("#about").onclick = () => { settings(); const a = document.getElementById("about-card"); if (a) a.scrollIntoView(); };
+    wireTabs();
+    const g = app.querySelector("#hd-go"); if (g) g.onclick = () => startHands();
+    const a = app.querySelector("#hd-again"); if (a) a.onclick = () => startHands(null, true);
+    app.querySelectorAll("[data-hd]").forEach((b) => b.onclick = () => startHands(b.dataset.hd));
+    app.querySelectorAll("[data-prop]").forEach((b) => b.onclick = () => {
+      S.props = Object.assign({}, S.props, { [b.dataset.prop]: !(S.props && S.props[b.dataset.prop]) }); save(); handsHome();
+    });
+  }
+
+  function handRun() {
+    stopTimer();
+    const st = hSession.steps[hSession.k];
+    if (!st) { hSession = null; return handsHome(); }
+    const id = st.id, h = HANDS[id], how = handText(h);
+    app.innerHTML = `
+      <div class="top"><button class="icon-btn" id="back">${t("home")}</button><span class="eyebrow">${st.of > 1 ? `Round ${st.r + 1} of ${st.of}` : "Hands"}</span></div>
+      ${handStrip()}
+      <div class="card">
+        <h1>${h.name}</h1>
+        <svg class="anim" id="hd-anim" viewBox="0 0 200 200" role="img" aria-label="${esc(h.name)}: animated example"></svg>
+        <p style="font-size:1.15rem">${esc(how)}</p>
+        ${h.prop && !hasProp(h) ? `<p class="note">No ${esc(PROPS[h.prop].replace(/^\S+\s/, "").toLowerCase())} needed for this version.</p>` : ""}
+        <div class="timer" id="hd-clock">${h.type === "time" ? fmtSecs(h.secs) : h.reps + "<small> times</small>"}</div>
+        ${h.type === "time" ? `<button class="btn btn-teal btn-big" id="hd-start">Start the timer</button>` : ""}
+        <button class="btn ${h.type === "time" ? "btn-ghost" : "btn-teal btn-big"}" id="hd-done">Done</button>
+        <button class="btn btn-ghost" id="hd-hear">${t("hear")}</button>
+        <p class="muted" style="text-align:center">${esc(h.tip)}</p>
+        <p class="note" style="text-align:center">Stop if anything hurts, or you feel numbness or tingling.</p>
+      </div>
+      <button class="btn btn-ghost" id="hd-skip">Skip this one</button>`;
+    app.querySelector("#back").onclick = () => { hSession = null; home(); };
+    centerStrip();
+    playAnim(app.querySelector("#hd-anim"), handAnimFor(id));
+    app.querySelector("#hd-hear").onclick = () => speak(h.name + ". " + how + " " + h.tip);
+    const finish = (did) => {
+      stopTimer();
+      if (did) {
+        const p = handProg(); p[id] = Math.max(p[id] || 0, st.r + 1);
+        if (p[id] >= st.of) handDone()[id] = true;
+        save();
+      }
+      const label = handNextLabel();
+      do { hSession.k++; } while (hSession.k < hSession.steps.length && handStepDone(hSession.steps[hSession.k]));
+      if (hSession.k < hSession.steps.length) return handRest(label);
+      hSession = null;
+      if (handPlan().steps.every((x) => handDone()[x])) { track("hands-all-done"); return handDoneScreen(); }
+      handsHome();
+    };
+    app.querySelector("#hd-done").onclick = () => finish(true);
+    app.querySelector("#hd-skip").onclick = () => finish(false);
+    const stb = app.querySelector("#hd-start");
+    if (stb) stb.onclick = () => {
+      stb.disabled = true; wake();
+      const clock = app.querySelector("#hd-clock"), end = performance.now() + h.secs * 1000;
+      timerId = setInterval(() => {
+        const left = Math.max(0, (end - performance.now()) / 1000);
+        clock.innerHTML = fmtSecs(Math.ceil(left));
+        if (left <= 0) { stopTimer(); clock.innerHTML = "✓"; stb.textContent = "Time's up. Tap Done."; }
+      }, 200);
+    };
+  }
+  function handRest(label) {
+    app.innerHTML = `
+      <div class="top"><button class="icon-btn" id="back">${t("home")}</button></div>
+      ${handStrip()}
+      <div class="card" style="text-align:center">
+        <div class="celebrate" aria-hidden="true">👏</div>
+        <h2>Nice work. Rest your hands.</h2>
+        ${S.coach !== false ? `<p class="coach good" aria-live="polite" id="cheer"></p>` : ""}
+        <p class="muted">Let your hands relax in your lap for a moment.</p>
+        <button class="btn btn-primary btn-big" id="hd-next">Next: ${esc(label)}</button>
+        <button class="btn btn-ghost" id="hd-stop">Stop for today</button>
+      </div>`;
+    if (S.coach !== false) cheer("move", app.querySelector("#cheer"), "move");
+    app.querySelector("#back").onclick = () => { hSession = null; home(); };
+    centerStrip();
+    app.querySelector("#hd-next").onclick = handRun;
+    app.querySelector("#hd-stop").onclick = () => { hSession = null; home(); };
+  }
+  function handDoneScreen() {
+    app.innerHTML = `
+      ${handStrip()}
+      <div class="card" style="text-align:center">
+        <div class="celebrate" aria-hidden="true">🌼</div>
+        <h1>All hand practice done today!</h1>
+        <p class="muted">${S.name ? esc(S.name) + ", w" : "W"}onderful work. Shake out your hands and rest.</p>
+      </div>
+      <button class="btn btn-ghost" id="hd-home">${t("backHome")}</button>`;
+    speak("All hand practice done today. Wonderful work.");
+    app.querySelector("#hd-home").onclick = home;
+  }
+
+  // ---------- hand animations ----------
+  // A simple hand seen palm-on: each pose gives how far the fingers spread and curl and where
+  // the thumb tip is; whole-hand turns, moves and props are extra values in the pose.
+  const HWR = [100, 178];                                                   // wrist
+  const FB = [[79, 112], [93, 107], [107, 108], [121, 113]], FL = [38, 45, 42, 32], FA = [-13, -4, 4, 13];
+  function tipOf(i, curl, spread) {
+    const a = FA[i] * spread * Math.PI / 180, l = FL[i] * (1 - 0.72 * curl);
+    return [FB[i][0] + l * Math.sin(a), FB[i][1] - l * Math.cos(a)];
+  }
+  const TBASE = [77, 154];
+  const HP = (spread, c, th, extra) => Object.assign({ rot: 0, sx: 1, sc: 1, dx: 0, dy: 0, spread, c, th }, extra || {});
+  const H_OPEN = HP(1, [0, 0, 0, 0], [46, 120]), H_FIST = HP(0.2, [1, 1, 1, 1], [97, 133]), H_REST = HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128]);
+  const touch = (i, extra) => { const c = [0.15, 0.15, 0.15, 0.15]; c[i] = 0.45; return HP(0.5, c, tipOf(i, 0.45, 0.5), extra); };
+  const PINCH = (extra) => touch(0, extra);
+  // Blend any two poses with the same shape (numbers, arrays and objects of numbers).
+  const mixAny = (a, b, f) => typeof a === "number" ? a + (b - a) * f
+    : Array.isArray(a) ? a.map((x, i) => mixAny(x, b[i], f))
+    : a && typeof a === "object" ? Object.fromEntries(Object.keys(a).map((k) => [k, k in b ? mixAny(a[k], b[k], f) : a[k]])) : a;
+  const HANIM = {
+    open:    { dur: 1200, poses: [H_OPEN, H_FIST] },
+    thumbs:  { dur: 650, poses: [touch(0), touch(1), touch(2), touch(3), touch(2), touch(1)] },
+    wrist:   { dur: 1100, poses: [H_REST, HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { sx: -1 }), H_REST, HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { rot: -22 }), HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { rot: 22 })] },
+    squeeze: { dur: 1500, poses: [HP(0.3, [0.5, 0.5, 0.5, 0.5], [70, 132], { ball: 20 }), HP(0.2, [0.8, 0.8, 0.8, 0.8], [88, 134], { ball: 17 })],
+               alt: { dur: 1500, poses: [H_OPEN, H_FIST, H_FIST] } },
+    coins:   { dur: 900, poses: [PINCH({ coin: 1, flip: 0 }), PINCH({ coin: 1, flip: 1 })],
+               alt: { dur: 650, poses: [touch(0), touch(1), touch(2), touch(3)] } },
+    pickup:  { dur: 900, table: true, cup: true, poses: [PINCH({ sc: 0.6, rot: 180, dx: -45, dy: -33, hold: 0 }), PINCH({ sc: 0.6, rot: 180, dx: -45, dy: -33, hold: 1 }), PINCH({ sc: 0.6, rot: 180, dx: -10, dy: -75, hold: 1 }), PINCH({ sc: 0.6, rot: 180, dx: 42, dy: -70, hold: 1 }), PINCH({ sc: 0.6, rot: 180, dx: 42, dy: -70, hold: 0 })],
+               alt: { dur: 700, table: false, cup: false, poses: [touch(0), H_OPEN, touch(1), H_OPEN, touch(2), H_OPEN, touch(3), H_OPEN] } },
+    lift:    { dur: 1500, side: true, bottle: true, poses: [{ rot: 18 }, { rot: -32 }], alt: { dur: 1500, side: true, poses: [{ rot: 18 }, { rot: -32 }] } },
+    write:   { dur: 3000, write: true, paper: true, poses: [{ t: 0 }, { t: 1 }, { t: 1 }], alt: { dur: 3000, write: true, poses: [{ t: 0 }, { t: 1 }, { t: 1 }] } },
+    calm:    { dur: 1600, breath: true, poses: [HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { rot: -5 }), HP(0.4, [0.1, 0.1, 0.1, 0.1], [56, 128], { rot: 5 })] }
+  };
+  // Uses the no-prop animation when the person has not ticked that prop.
+  function handAnimFor(id) {
+    const a = HANIM[id]; if (!a) return null;
+    const has = hasProp(HANDS[id]), base = !has && a.alt ? Object.assign({}, a, a.alt) : a;
+    return Object.assign({}, base, { alt: undefined, bottle: has && !!a.bottle, paper: has && !!a.paper, draw: handSVG, mix: mixAny });
+  }
+  const pts = (arr) => arr.map((q) => q[0].toFixed(1) + "," + q[1].toFixed(1)).join(" ");
+  function handSVG(spec, p) {
+    if (spec.side) return sideHandSVG(spec, p);
+    if (spec.write) return writeSVG(spec, p);
+    let out = "";
+    if (spec.table) out += `<line x1="15" y1="188" x2="185" y2="188" stroke="var(--line)" stroke-width="3" stroke-linecap="round"/>`
+      + [[38, 185], [52, 186], [66, 185]].map((c) => `<ellipse cx="${c[0]}" cy="${c[1]}" rx="6" ry="2.5" fill="var(--marigold)"/>`).join("");
+    const stroke = `stroke="var(--teal)" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+    let g = `<rect x="85" y="168" width="30" height="60" rx="10" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="4"/>`
+      + `<rect x="70" y="104" width="60" height="72" rx="18" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="5"/>`;
+    if (p.ball) g += `<circle cx="100" cy="140" r="${p.ball.toFixed(1)}" fill="var(--marigold)" opacity=".9"/>`;
+    for (let i = 0; i < 4; i++) g += `<polyline points="${pts([FB[i], tipOf(i, p.c[i], p.spread)])}" ${stroke} stroke-width="12"/>`;
+    const th = p.th, mid = [(TBASE[0] + th[0]) / 2 - 9, (TBASE[1] + th[1]) / 2 + 5];
+    g += `<polyline points="${pts([TBASE, mid, th])}" ${stroke} stroke-width="13"/>`;
+    if (p.coin || (p.hold !== undefined && p.hold > 0.5)) {
+      const ix = tipOf(0, p.c[0], p.spread), cx = (ix[0] + th[0]) / 2, cy = (ix[1] + th[1]) / 2;
+      const ry = Math.max(1.5, 8 * Math.abs(Math.cos((p.flip || 0) * Math.PI)));
+      g += `<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="8" ry="${ry.toFixed(1)}" fill="var(--marigold)" stroke="var(--ink)" stroke-width="1"/>`;
+    }
+    out += `<g transform="translate(${p.dx.toFixed(1)} ${p.dy.toFixed(1)}) translate(${HWR[0]} ${HWR[1]}) rotate(${p.rot.toFixed(1)}) scale(${(p.sx * p.sc).toFixed(3)} ${p.sc.toFixed(3)}) translate(${-HWR[0]} ${-HWR[1]})">${g}</g>`;
+    if (spec.cup) out += `<path d="M132 150 L136 188 L164 188 L168 150 Z" fill="var(--surface)" stroke="var(--teal)" stroke-width="4" stroke-linejoin="round"/>`;
+    return out;
+  }
+  // Seen from the side: forearm resting on a table, hand over the edge, bending at the wrist.
+  function sideHandSVG(spec, p) {
+    let out = `<rect x="10" y="140" width="96" height="50" rx="4" fill="var(--line)" opacity=".6"/>`
+      + `<rect x="22" y="118" width="84" height="22" rx="10" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="5"/>`;
+    let g = `<rect x="100" y="117" width="38" height="24" rx="10" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="5"/>`;
+    if (spec.bottle) g += `<rect x="136" y="96" width="16" height="64" rx="6" fill="var(--marigold)" opacity=".9"/>`;
+    g += `<path d="M136 120 q 16 0 16 12 q 0 12 -16 12" fill="none" stroke="var(--teal)" stroke-width="10" stroke-linecap="round"/>`;
+    out += `<g transform="rotate(${p.rot.toFixed(1)} 104 129)">${g}</g>`;
+    return out;
+  }
+  // Big loops drawn across the page, then started again.
+  const LOOP = Array.from({ length: 121 }, (_, i) => { const t = i / 120 * 7 * Math.PI; return [28 + t * 6.2 - 9 * Math.sin(t), 118 - 26 * Math.cos(t)]; });
+  function writeSVG(spec, p) {
+    const n = Math.max(1, Math.round(p.t * (LOOP.length - 1))), tip = LOOP[n];
+    let out = spec.paper ? `<rect x="14" y="62" width="172" height="104" rx="6" fill="var(--surface)" stroke="var(--line)" stroke-width="3"/>` : "";
+    out += `<polyline points="${pts(LOOP.slice(0, n + 1))}" fill="none" stroke="var(--teal)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" ${spec.paper ? "" : 'stroke-dasharray="2 6"'}/>`;
+    out += spec.paper ? `<line x1="${tip[0].toFixed(1)}" y1="${tip[1].toFixed(1)}" x2="${(tip[0] + 16).toFixed(1)}" y2="${(tip[1] - 34).toFixed(1)}" stroke="var(--ink)" stroke-width="6" stroke-linecap="round"/>`
+                      : `<circle cx="${tip[0].toFixed(1)}" cy="${tip[1].toFixed(1)}" r="6" fill="var(--teal)"/>`;
+    return out;
+  }
+
   // ---------- exercise animations ----------
   // A stick figure drawn with simple inverse kinematics: each pose gives the pelvis, torso lean
   // and where the hands and ankles are; elbows and knees are worked out. Poses loop smoothly.
@@ -1081,8 +1405,8 @@ input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: va
       if (!el.isConnected) return;
       const tt = reduce ? 0 : Math.max(0, now - t0) / spec.dur; // a frame can be stamped just before t0
       const seg = Math.floor(tt) % n, f = (1 - Math.cos((tt % 1) * Math.PI)) / 2;
-      const p = n === 1 ? spec.poses[0] : mix(spec.poses[seg], spec.poses[(seg + 1) % n], f);
-      let svg = figureSVG(spec, p);
+      const blend = spec.mix || mix, p = n === 1 ? spec.poses[0] : blend(spec.poses[seg], spec.poses[(seg + 1) % n], f);
+      let svg = (spec.draw || figureSVG)(spec, p);
       if (spec.breath) {
         const k = (1 - Math.cos((Math.max(0, now - t0) / 10000) * Math.PI * 2)) / 2; // 4 in, 6 out is close to a 10 s cycle
         svg += `<circle cx="160" cy="60" r="${(10 + 14 * k).toFixed(1)}" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="2"/><text x="160" y="96" text-anchor="middle" font-size="11" fill="var(--muted)">${k > 0.5 ? "breathe in" : "breathe out"}</text>`;
